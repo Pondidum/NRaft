@@ -19,14 +19,14 @@ namespace NRaft.Tests.StateTests
 			_state = new State(_dispatcher, 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
-				new LogEntry { Term = 0 },
-				new LogEntry { Term = 1 },
-				new LogEntry { Term = 2 },
-				new LogEntry { Term = 3 },
-				new LogEntry { Term = 3 },
-				new LogEntry { Term = 4 },
-				new LogEntry { Term = 5 },
-				new LogEntry { Term = 6 }
+				new LogEntry { Index = 1, Term = 0 },
+				new LogEntry { Index = 2, Term = 1 },
+				new LogEntry { Index = 3, Term = 2 },
+				new LogEntry { Index = 4, Term = 3 },
+				new LogEntry { Index = 5, Term = 3 },
+				new LogEntry { Index = 6, Term = 4 },
+				new LogEntry { Index = 7, Term = 5 },
+				new LogEntry { Index = 8, Term = 6 }
 			);
 			_state.ForceCommitIndex(7);
 		}
@@ -69,9 +69,9 @@ namespace NRaft.Tests.StateTests
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = 7,
-				Entries = new Dictionary<int, LogEntry>
+				Entries = new[]
 				{
-					[4] = new LogEntry {Term = 4}
+					new LogEntry { Index = 5, Term = 4}
 				}
 			};
 
@@ -79,11 +79,11 @@ namespace NRaft.Tests.StateTests
 
 			_state.Log.ShouldBe(new []
 			{
-				new LogEntry { Term = 0 },
-				new LogEntry { Term = 1 },
-				new LogEntry { Term = 2 },
-				new LogEntry { Term = 3 },
-				new LogEntry { Term = 4 },
+				new LogEntry { Index = 1, Term = 0 },
+				new LogEntry { Index = 2, Term = 1 },
+				new LogEntry { Index = 3, Term = 2 },
+				new LogEntry { Index = 4, Term = 3 },
+				new LogEntry { Index = 5, Term = 4 },
 			});
 		}
 
@@ -110,10 +110,10 @@ namespace NRaft.Tests.StateTests
 				Term = CurrentTerm,
 				PreviousLogIndex = 7,
 				LeaderCommit = 8,
-				Entries = new Dictionary<int, LogEntry>
+				Entries = new[]
 				{
-					[8] = new LogEntry { Term = CurrentTerm },
-					[9] = new LogEntry { Term = CurrentTerm }
+					new LogEntry { Index = 8, Term = CurrentTerm },
+					new LogEntry { Index = 9, Term = CurrentTerm }
 				}
 			};
 
@@ -130,10 +130,10 @@ namespace NRaft.Tests.StateTests
 				Term = CurrentTerm,
 				PreviousLogIndex = 7,
 				LeaderCommit = 15,
-				Entries = new Dictionary<int, LogEntry>
+				Entries = new[]
 				{
-					[8] = new LogEntry { Term = CurrentTerm },
-					[9] = new LogEntry { Term = CurrentTerm }
+					new LogEntry { Index = 8, Term = CurrentTerm },
+					new LogEntry { Index = 9, Term = CurrentTerm }
 				}
 			};
 

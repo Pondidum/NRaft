@@ -17,7 +17,7 @@ namespace NRaft
 		//need to be persistent store
 		private int _currentTerm;
 		private int? _votedFor;
-		private List<LogEntry> _log;
+		private LogEntry[] _log;
 
 		//only in memory
 		public int CommitIndex { get; private set; }
@@ -33,7 +33,7 @@ namespace NRaft
 			_nodeID = nodeID;
 			_currentTerm = 0;
 			_votedFor = null;
-			_log = new List<LogEntry>();
+			_log = Enumerable.Empty<LogEntry>().ToArray();
 
 			CommitIndex = 0;
 			_lastApplied = 0;
@@ -51,44 +51,36 @@ namespace NRaft
 			if (message.Term < _currentTerm)
 				_dispatcher.SendReply(new AppendEntriesResponse { Success = false, Term = _currentTerm });
 
-			if (_log.Count - 1 < message.PreviousLogIndex)
+			else if (_log.Any(e => e.Index == message.PreviousLogIndex) == false)
 				_dispatcher.SendReply(new AppendEntriesResponse { Success = false, Term = _currentTerm });
 
-			if (_log[message.PreviousLogIndex].Term != message.Term)
+			else if (_log.Single(e => e.Index == message.PreviousLogIndex).Term != message.Term)
 				_dispatcher.SendReply(new AppendEntriesResponse { Success = false, Term = _currentTerm });
 
-			//get all new items where the index is already in the log
-			//check they don't conflict, delete if they do
-
-			var firstBroken = message
-				.Entries
-				.Where(pair => pair.Key < _log.Count)
-				.OrderBy(e => e.Key)
-				.Where(pair => pair.Value.Term != _log[pair.Key].Term)
-				.Select(pair => pair.Key)
-				.ToArray();
-
-			if (firstBroken.Any())
+			else
 			{
-				_log.RemoveRange(firstBroken.First(),_log.Count - firstBroken.First());
+				_log = MergeChangeSets(_log, message.Entries);
+
+
+				if (message.LeaderCommit > CommitIndex)
+					CommitIndex = Math.Min(message.LeaderCommit, _log.Last().Index);
 			}
+		}
 
-			var remaining = message
-				.Entries
-				.Where(pair => pair.Key >= _log.Count)
-				.OrderBy(pair => pair.Key)
-				.Select(pair => pair.Value);
+		private static LogEntry[] MergeChangeSets(LogEntry[] current, LogEntry[] changes)
+		{
+			if (changes.Length == 0)
+				return current;
 
-			_log.AddRange(remaining);
-
-			if (message.LeaderCommit > CommitIndex)
-				CommitIndex = Math.Min(message.LeaderCommit, _log.Count - 1);
+			return current
+				.TakeWhile(e => e.Index < changes[0].Index)
+				.Concat(changes)
+				.ToArray();
 		}
 
 		public void ForceLog(params LogEntry[] log)
 		{
-			_log.Clear();
-			_log.AddRange(log);
+			_log = log;
 		}
 
 		public void ForceCommitIndex(int index)
@@ -99,14 +91,16 @@ namespace NRaft
 
 	public class LogEntry : IEquatable<LogEntry>
 	{
-		public string Command { get; set; }
+		public int Index { get; set; }
 		public int Term { get; set; }
+		public string Command { get; set; }
 
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
 			if (obj.GetType() != this.GetType()) return false;
+
 			return Equals((LogEntry)obj);
 		}
 
@@ -114,12 +108,20 @@ namespace NRaft
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
-			return Term == other.Term;
+			return Index == other.Index && Term == other.Term;
 		}
 
 		public override int GetHashCode()
 		{
-			return Term;
+			unchecked
+			{
+				return (Index * 397) ^ Term;
+			}
+		}
+
+		public override string ToString()
+		{
+			return $"Index {Index}, Term {Term}";
 		}
 
 		public static bool operator ==(LogEntry left, LogEntry right)
@@ -141,12 +143,12 @@ namespace NRaft
 		public int PreviousLogIndex { get; set; }
 		public int PreviousLogTerm { get; set; }
 
-		public Dictionary<int, LogEntry> Entries { get; set; }
+		public LogEntry[] Entries { get; set; }
 		public int LeaderCommit { get; set; }
 
 		public AppendEntriesRpc()
 		{
-			Entries = new Dictionary<int, LogEntry>();
+			Entries = Enumerable.Empty<LogEntry>().ToArray();
 		}
 	}
 
