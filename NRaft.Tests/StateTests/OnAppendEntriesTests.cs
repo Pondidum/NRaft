@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using NSubstitute;
+﻿using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -43,7 +42,7 @@ namespace NRaft.Tests.StateTests
 
 			_dispatcher
 				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success == false));
+				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success == false && m.Term == CurrentTerm));
 		}
 
 		[Fact]
@@ -59,7 +58,7 @@ namespace NRaft.Tests.StateTests
 
 			_dispatcher
 				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success == false));
+				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success == false && m.Term == CurrentTerm));
 		}
 
 		[Fact]
@@ -85,6 +84,10 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 4, Term = 3 },
 				new LogEntry { Index = 5, Term = 4 },
 			});
+
+			_dispatcher
+				.Received()
+				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
 		}
 
 		[Fact]
@@ -100,6 +103,10 @@ namespace NRaft.Tests.StateTests
 			_state.OnAppendEntries(message);
 
 			_state.CommitIndex.ShouldBe(7);
+
+			_dispatcher
+				.Received()
+				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
 		}
 
 		[Fact]
@@ -120,6 +127,10 @@ namespace NRaft.Tests.StateTests
 			_state.OnAppendEntries(message);
 
 			_state.CommitIndex.ShouldBe(8);
+
+			_dispatcher
+				.Received()
+				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
 		}
 
 		[Fact]
@@ -140,6 +151,10 @@ namespace NRaft.Tests.StateTests
 			_state.OnAppendEntries(message);
 
 			_state.CommitIndex.ShouldBe(9);
+
+			_dispatcher
+				.Received()
+				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
 		}
 	}
 }

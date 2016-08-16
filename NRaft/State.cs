@@ -48,23 +48,32 @@ namespace NRaft
 
 		public void OnAppendEntries(AppendEntriesRpc message)
 		{
-			if (message.Term < _currentTerm)
-				_dispatcher.SendReply(new AppendEntriesResponse { Success = false, Term = _currentTerm });
+			var success = AppendEntries(message);
 
-			else if (_log.Any(e => e.Index == message.PreviousLogIndex) == false)
-				_dispatcher.SendReply(new AppendEntriesResponse { Success = false, Term = _currentTerm });
-
-			else if (_log.Single(e => e.Index == message.PreviousLogIndex).Term != message.Term)
-				_dispatcher.SendReply(new AppendEntriesResponse { Success = false, Term = _currentTerm });
-
-			else
+			_dispatcher.SendReply(new AppendEntriesResponse
 			{
-				_log = MergeChangeSets(_log, message.Entries);
+				Success = success,
+				Term = _currentTerm
+			});
+		}
 
+		private bool AppendEntries(AppendEntriesRpc message)
+		{
+			if (message.Term < _currentTerm)
+				return false;
 
-				if (message.LeaderCommit > CommitIndex)
-					CommitIndex = Math.Min(message.LeaderCommit, _log.Last().Index);
-			}
+			if (_log.Any(e => e.Index == message.PreviousLogIndex) == false)
+				return false;
+
+			if (_log.Single(e => e.Index == message.PreviousLogIndex).Term != message.Term)
+				return false;
+
+			_log = MergeChangeSets(_log, message.Entries);
+
+			if (message.LeaderCommit > CommitIndex)
+				CommitIndex = Math.Min(message.LeaderCommit, _log.Last().Index);
+
+			return true;
 		}
 
 		private static LogEntry[] MergeChangeSets(LogEntry[] current, LogEntry[] changes)
