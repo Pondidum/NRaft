@@ -20,7 +20,7 @@ namespace NRaft
 		private List<LogEntry> _log;
 
 		//only in memory
-		private int _commitIndex;
+		public int CommitIndex { get; private set; }
 		private int _lastApplied;
 
 		//leader-only state - perhaps refactor to leaderState
@@ -35,7 +35,7 @@ namespace NRaft
 			_votedFor = null;
 			_log = new List<LogEntry>();
 
-			_commitIndex = 0;
+			CommitIndex = 0;
 			_lastApplied = 0;
 		}
 
@@ -72,12 +72,28 @@ namespace NRaft
 			{
 				_log.RemoveRange(firstBroken.First(),_log.Count - firstBroken.First());
 			}
+
+			var remaining = message
+				.Entries
+				.Where(pair => pair.Key >= _log.Count)
+				.OrderBy(pair => pair.Key)
+				.Select(pair => pair.Value);
+
+			_log.AddRange(remaining);
+
+			if (message.LeaderCommit > CommitIndex)
+				CommitIndex = Math.Min(message.LeaderCommit, _log.Count - 1);
 		}
 
 		public void ForceLog(params LogEntry[] log)
 		{
 			_log.Clear();
 			_log.AddRange(log);
+		}
+
+		public void ForceCommitIndex(int index)
+		{
+			CommitIndex = index;
 		}
 	}
 

@@ -28,6 +28,7 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Term = 5 },
 				new LogEntry { Term = 6 }
 			);
+			_state.ForceCommitIndex(7);
 		}
 
 		[Fact]
@@ -81,10 +82,64 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Term = 0 },
 				new LogEntry { Term = 1 },
 				new LogEntry { Term = 2 },
-				new LogEntry { Term = 3 }
+				new LogEntry { Term = 3 },
+				new LogEntry { Term = 4 },
 			});
 		}
 
+		[Fact]
+		public void When_the_leader_has_a_newer_commit_index_and_there_are_no_new_entries()
+		{
+			var message = new AppendEntriesRpc
+			{
+				Term = CurrentTerm,
+				PreviousLogIndex = 7,
+				LeaderCommit = 7
+			};
 
+			_state.OnAppendEntries(message);
+
+			_state.CommitIndex.ShouldBe(7);
+		}
+
+		[Fact]
+		public void When_the_leader_has_a_newer_commit_index_and_there_are_new_entries()
+		{
+			var message = new AppendEntriesRpc
+			{
+				Term = CurrentTerm,
+				PreviousLogIndex = 7,
+				LeaderCommit = 8,
+				Entries = new Dictionary<int, LogEntry>
+				{
+					[8] = new LogEntry { Term = CurrentTerm },
+					[9] = new LogEntry { Term = CurrentTerm }
+				}
+			};
+
+			_state.OnAppendEntries(message);
+
+			_state.CommitIndex.ShouldBe(8);
+		}
+
+		[Fact]
+		public void When_the_leader_has_a_newer_commit_index_and_there_are_less_new_entries()
+		{
+			var message = new AppendEntriesRpc
+			{
+				Term = CurrentTerm,
+				PreviousLogIndex = 7,
+				LeaderCommit = 15,
+				Entries = new Dictionary<int, LogEntry>
+				{
+					[8] = new LogEntry { Term = CurrentTerm },
+					[9] = new LogEntry { Term = CurrentTerm }
+				}
+			};
+
+			_state.OnAppendEntries(message);
+
+			_state.CommitIndex.ShouldBe(9);
+		}
 	}
 }
