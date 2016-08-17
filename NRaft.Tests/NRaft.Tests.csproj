@@ -67,6 +67,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scratchpad.cs" />
     <Compile Include="StateTests\OnAppendEntriesTests.cs" />
+    <Compile Include="StateTests\OnRequestVoteTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

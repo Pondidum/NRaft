@@ -41,6 +41,32 @@ namespace NRaft
 			_currentTerm = term;
 		}
 
+		public void OnRequestVote(RequestVoteRpc message)
+		{
+			var voteGranted = RequestVote(message);
+
+			_dispatcher.SendReply(new RequestVoteResponse
+			{
+				Term = _currentTerm,
+				VoteGranted = voteGranted
+			});
+		}
+
+		private bool RequestVote(RequestVoteRpc message)
+		{
+			if (message.Term < _currentTerm)
+				return false;
+
+			if (_log.Any() && message.LastLogIndex != _log.Last().Index)
+				return false;
+
+			if (_votedFor.HasValue && _votedFor.Value != message.CandidateID)
+				return false;
+
+			_votedFor = message.CandidateID;
+			return true;
+		}
+
 		public void OnAppendEntries(AppendEntriesRpc message)
 		{
 			var success = AppendEntries(message);
@@ -90,6 +116,11 @@ namespace NRaft
 		public void ForceCommitIndex(int index)
 		{
 			CommitIndex = index;
+		}
+
+		public void ForceVotedFor(int candidateID)
+		{
+			_votedFor = candidateID;
 		}
 	}
 }
