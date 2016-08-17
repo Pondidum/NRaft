@@ -36,11 +36,6 @@ namespace NRaft
 
 		public IEnumerable<LogEntry> Log => _log;
 
-		public void ForceTerm(int term)
-		{
-			_currentTerm = term;
-		}
-
 		public void OnRequestVote(RequestVoteRpc message)
 		{
 			var voteGranted = RequestVote(message);
@@ -106,6 +101,11 @@ namespace NRaft
 				.TakeWhile(e => e.Index < changes[0].Index)
 				.Concat(changes)
 				.ToArray();
+		}
+
+		public void ForceTerm(int term)
+		{
+			_currentTerm = term;
 		}
 
 		public void ForceLog(params LogEntry[] log)
