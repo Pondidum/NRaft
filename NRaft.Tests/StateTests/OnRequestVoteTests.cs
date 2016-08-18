@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System.Linq;
+using NSubstitute;
 using Xunit;
 
 namespace NRaft.Tests.StateTests
@@ -36,7 +37,8 @@ namespace NRaft.Tests.StateTests
 			{
 				Term = CurrentTerm - 2,
 				CandidateID = 20,
-				LastLogIndex = 7
+				LastLogIndex = _state.Log.Last().Index,
+				LastLogTerm = _state.Log.Last().Term
 			};
 
 			_state.OnRequestVote(message);
@@ -53,7 +55,8 @@ namespace NRaft.Tests.StateTests
 			{
 				Term = CurrentTerm,
 				CandidateID = 20,
-				LastLogIndex = 7
+				LastLogIndex = _state.Log.Last().Index,
+				LastLogTerm = _state.Log.Last().Term
 			};
 
 			_state.ForceVotedFor(15);
@@ -88,7 +91,8 @@ namespace NRaft.Tests.StateTests
 			{
 				Term = CurrentTerm,
 				CandidateID = 20,
-				LastLogIndex = 7
+				LastLogIndex = _state.Log.Last().Index,
+				LastLogTerm = _state.Log.Last().Term
 			};
 
 			_state.OnRequestVote(message);

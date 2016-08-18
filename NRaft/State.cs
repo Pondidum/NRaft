@@ -36,31 +36,6 @@ namespace NRaft
 
 		public IEnumerable<LogEntry> Log => _log;
 
-		public void OnRequestVote(RequestVoteRpc message)
-		{
-			var voteGranted = RequestVote(message);
-
-			_dispatcher.SendReply(new RequestVoteResponse
-			{
-				Term = _currentTerm,
-				VoteGranted = voteGranted
-			});
-		}
-
-		private bool RequestVote(RequestVoteRpc message)
-		{
-			if (message.Term < _currentTerm)
-				return false;
-
-			if (_log.Any() && message.LastLogIndex != _log.Last().Index)
-				return false;
-
-			if (_votedFor.HasValue && _votedFor.Value != message.CandidateID)
-				return false;
-
-			_votedFor = message.CandidateID;
-			return true;
-		}
 
 		public void OnAppendEntries(AppendEntriesRpc message)
 		{
@@ -72,6 +47,37 @@ namespace NRaft
 				Term = _currentTerm
 			});
 		}
+
+		public void OnRequestVote(RequestVoteRpc message)
+		{
+			var voteGranted = RequestVote(message);
+
+			_dispatcher.SendReply(new RequestVoteResponse
+			{
+				Term = _currentTerm,
+				VoteGranted = voteGranted
+			});
+		}
+
+
+		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
+		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
+
+		private bool RequestVote(RequestVoteRpc message)
+		{
+			var logOk = message.LastLogTerm > LastTerm() 
+				|| (message.LastLogTerm == LastTerm() && message.LastLogIndex >= LastIndex());
+
+			var grant = message.Term == _currentTerm
+				&& logOk
+				&& (_votedFor.HasValue == false || _votedFor.Value == message.CandidateID);
+
+			if (grant)
+				_votedFor = message.CandidateID;
+
+			return grant;
+		}
+
 
 		private bool AppendEntries(AppendEntriesRpc message)
 		{
