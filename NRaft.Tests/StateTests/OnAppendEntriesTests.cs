@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System.Linq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -67,7 +68,8 @@ namespace NRaft.Tests.StateTests
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = 7,
+				PreviousLogIndex = _state.Log.Last().Index,
+				PreviousLogTerm = _state.Log.Last().Term,
 				Entries = new[]
 				{
 					new LogEntry { Index = 5, Term = 4}
@@ -96,7 +98,8 @@ namespace NRaft.Tests.StateTests
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = 7,
+				PreviousLogIndex = _state.Log.Last().Index,
+				PreviousLogTerm = _state.Log.Last().Term,
 				LeaderCommit = 7
 			};
 
@@ -115,7 +118,8 @@ namespace NRaft.Tests.StateTests
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = 7,
+				PreviousLogIndex = _state.Log.Last().Index,
+				PreviousLogTerm = _state.Log.Last().Term,
 				LeaderCommit = 8,
 				Entries = new[]
 				{
@@ -139,7 +143,8 @@ namespace NRaft.Tests.StateTests
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = 7,
+				PreviousLogIndex = _state.Log.Last().Index,
+				PreviousLogTerm = _state.Log.Last().Term,
 				LeaderCommit = 15,
 				Entries = new[]
 				{

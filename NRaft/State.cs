@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace NRaft
 {
@@ -21,6 +22,7 @@ namespace NRaft
 		//leader-only state - perhaps refactor to leaderState
 		private int _nextIndex;
 		private int _matchIndex;
+		private Types _type;
 
 		public State(IDispatcher dispatcher, int nodeID)
 		{
@@ -29,6 +31,7 @@ namespace NRaft
 			_currentTerm = 0;
 			_votedFor = null;
 			_log = Enumerable.Empty<LogEntry>().ToArray();
+			_type = Types.Follower;
 
 			CommitIndex = 0;
 			_lastApplied = 0;
@@ -65,7 +68,7 @@ namespace NRaft
 
 		private bool RequestVote(RequestVoteRpc message)
 		{
-			var logOk = message.LastLogTerm > LastTerm() 
+			var logOk = message.LastLogTerm > LastTerm()
 				|| (message.LastLogTerm == LastTerm() && message.LastLogIndex >= LastIndex());
 
 			var grant = message.Term == _currentTerm
@@ -81,13 +84,14 @@ namespace NRaft
 
 		private bool AppendEntries(AppendEntriesRpc message)
 		{
-			if (message.Term < _currentTerm)
-				return false;
+			var logOk = message.PreviousLogIndex == 0
+				|| (
+					message.PreviousLogIndex > 0
+					&& message.PreviousLogIndex <= LastIndex()
+					&& message.PreviousLogTerm == _log.Single(e => e.Index == message.PreviousLogIndex).Term
+				);
 
-			if (_log.Any(e => e.Index == message.PreviousLogIndex) == false)
-				return false;
-
-			if (_log.Single(e => e.Index == message.PreviousLogIndex).Term != message.Term)
+			if (message.Term < _currentTerm || (message.Term == _currentTerm && _type == Types.Follower && logOk == false))
 				return false;
 
 			_log = MergeChangeSets(_log, message.Entries);
