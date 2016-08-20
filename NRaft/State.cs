@@ -16,13 +16,14 @@ namespace NRaft
 		private LogEntry[] _log;
 
 		//only in memory
+		public Types Role { get; private set; }
 		public int CommitIndex { get; private set; }
 		private int _lastApplied;
 
 		//leader-only state - perhaps refactor to leaderState
 		private int _nextIndex;
 		private int _matchIndex;
-		private Types _type;
+
 
 		public State(IDispatcher dispatcher, int nodeID)
 		{
@@ -31,7 +32,7 @@ namespace NRaft
 			_currentTerm = 0;
 			_votedFor = null;
 			_log = Enumerable.Empty<LogEntry>().ToArray();
-			_type = Types.Follower;
+			Role = Types.Follower;
 
 			CommitIndex = 0;
 			_lastApplied = 0;
@@ -84,6 +85,9 @@ namespace NRaft
 
 		private bool AppendEntries(AppendEntriesRpc message)
 		{
+			if (message.Term > _currentTerm)
+				return false;
+
 			var logOk = message.PreviousLogIndex == 0
 				|| (
 					message.PreviousLogIndex > 0
@@ -91,10 +95,15 @@ namespace NRaft
 					&& message.PreviousLogTerm == _log.Single(e => e.Index == message.PreviousLogIndex).Term
 				);
 
-			if (message.Term < _currentTerm || (message.Term == _currentTerm && _type == Types.Follower && logOk == false))
+			if (message.Term < _currentTerm || (message.Term == _currentTerm && Role == Types.Follower && logOk == false))
 				return false;
 
 			_log = MergeChangeSets(_log, message.Entries);
+			if (message.Term == _currentTerm && Role == Types.Candidate)
+			{
+				Role = Types.Follower;
+			}
+
 
 			if (message.LeaderCommit > CommitIndex)
 				CommitIndex = Math.Min(message.LeaderCommit, _log.Last().Index);
@@ -131,6 +140,11 @@ namespace NRaft
 		public void ForceVotedFor(int candidateID)
 		{
 			_votedFor = candidateID;
+		}
+
+		public void ForceType(Types type)
+		{
+			Role = type;
 		}
 	}
 }

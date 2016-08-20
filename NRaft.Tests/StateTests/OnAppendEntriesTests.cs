@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.InteropServices;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -160,6 +161,23 @@ namespace NRaft.Tests.StateTests
 			_dispatcher
 				.Received()
 				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
+		}
+
+		[Fact]
+		public void When_the_node_is_a_candidate_and_the_terms_are_equal()
+		{
+			var message = new AppendEntriesRpc
+			{
+				Term = CurrentTerm,
+				PreviousLogIndex = _state.Log.Last().Index,
+				PreviousLogTerm = _state.Log.Last().Term,
+				LeaderCommit = _state.CommitIndex
+			};
+
+			_state.ForceType(Types.Candidate);
+			_state.OnAppendEntries(message);
+
+			_state.Role.ShouldBe(Types.Follower);
 		}
 	}
 }
