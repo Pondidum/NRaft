@@ -98,17 +98,20 @@ namespace NRaft
 			if (message.Term < _currentTerm || (message.Term == _currentTerm && Role == Types.Follower && logOk == false))
 				return false;
 
-			_log = MergeChangeSets(_log, message.Entries);
 			if (message.Term == _currentTerm && Role == Types.Candidate)
 			{
 				Role = Types.Follower;
+				return true;
 			}
 
-
-			if (message.LeaderCommit > CommitIndex)
+			if (message.Term == _currentTerm && Role == Types.Follower && logOk)
+			{
+				_log = MergeChangeSets(_log, message.Entries);
 				CommitIndex = Math.Min(message.LeaderCommit, _log.Last().Index);
+				return true;
+			}
 
-			return true;
+			return false;
 		}
 
 		private static LogEntry[] MergeChangeSets(LogEntry[] current, LogEntry[] changes)
