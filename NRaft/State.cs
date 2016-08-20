@@ -53,8 +53,10 @@ namespace NRaft
 
 			_dispatcher.SendReply(new AppendEntriesResponse
 			{
+				FollowerID = _nodeID,
 				Success = success,
-				Term = CurrentTerm
+				Term = CurrentTerm,
+				MatchIndex = success ? message.PreviousLogIndex + message.Entries.Length : 0
 			});
 		}
 

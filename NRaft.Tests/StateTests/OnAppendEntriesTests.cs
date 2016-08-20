@@ -10,12 +10,17 @@ namespace NRaft.Tests.StateTests
 	{
 		private const int CurrentTerm = 5;
 
+		private AppendEntriesResponse _response;
+
 		private readonly State _state;
 		private readonly IDispatcher _dispatcher;
 
 		public OnAppendEntriesTests()
 		{
 			_dispatcher = Substitute.For<IDispatcher>();
+			_dispatcher
+				.When(d => d.SendReply(Arg.Any<AppendEntriesResponse>()))
+				.Do(cb => _response = cb.Arg<AppendEntriesResponse>());
 
 			_state = new State(_dispatcher, 10);
 			_state.ForceTerm(CurrentTerm);
@@ -42,9 +47,11 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnAppendEntries(message);
 
-			_dispatcher
-				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success == false && m.Term == CurrentTerm));
+			_response.ShouldSatisfyAllConditions(
+				() => _response.Success.ShouldBeFalse(),
+				() => _response.Term.ShouldBe(CurrentTerm),
+				() => _response.MatchIndex.ShouldBe(0)
+			);
 		}
 
 		[Fact]
@@ -58,19 +65,23 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnAppendEntries(message);
 
-			_dispatcher
-				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success == false && m.Term == CurrentTerm));
+			_response.ShouldSatisfyAllConditions(
+				() => _response.Success.ShouldBeFalse(),
+				() => _response.Term.ShouldBe(CurrentTerm),
+				() => _response.MatchIndex.ShouldBe(0)
+			);
 		}
 
 		[Fact]
 		public void When_an_existing_entry_conflicts_with_a_new_entry()
 		{
+			var lastCommonEntry = _state.Log.Single(e => e.Index == 4);
+
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = _state.Log.Last().Index,
-				PreviousLogTerm = _state.Log.Last().Term,
+				PreviousLogIndex = lastCommonEntry.Index,
+				PreviousLogTerm = lastCommonEntry.Term,
 				Entries = new[]
 				{
 					new LogEntry { Index = 5, Term = 4}
@@ -79,7 +90,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnAppendEntries(message);
 
-			_state.Log.ShouldBe(new []
+			_state.Log.ShouldBe(new[]
 			{
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },
@@ -88,19 +99,23 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 5, Term = 4 },
 			});
 
-			_dispatcher
-				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
+			_response.ShouldSatisfyAllConditions(
+				() => _response.Success.ShouldBeTrue(),
+				() => _response.Term.ShouldBe(CurrentTerm),
+				() => _response.MatchIndex.ShouldBe(lastCommonEntry.Index + message.Entries.Length)
+			);
 		}
 
 		[Fact]
 		public void When_the_leader_has_a_newer_commit_index_and_there_are_no_new_entries()
 		{
+			var lastCommonEntry = _state.Log.Last();
+
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = _state.Log.Last().Index,
-				PreviousLogTerm = _state.Log.Last().Term,
+				PreviousLogIndex = lastCommonEntry.Index,
+				PreviousLogTerm = lastCommonEntry.Term,
 				LeaderCommit = 7
 			};
 
@@ -108,19 +123,23 @@ namespace NRaft.Tests.StateTests
 
 			_state.CommitIndex.ShouldBe(7);
 
-			_dispatcher
-				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
+			_response.ShouldSatisfyAllConditions(
+				() => _response.Success.ShouldBeTrue(),
+				() => _response.Term.ShouldBe(CurrentTerm),
+				() => _response.MatchIndex.ShouldBe(lastCommonEntry.Index)
+			);
 		}
 
 		[Fact]
 		public void When_the_leader_has_a_newer_commit_index_and_there_are_new_entries()
 		{
+			var lastCommonEntry = _state.Log.Last();
+
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = _state.Log.Last().Index,
-				PreviousLogTerm = _state.Log.Last().Term,
+				PreviousLogIndex = lastCommonEntry.Index,
+				PreviousLogTerm = lastCommonEntry.Term,
 				LeaderCommit = 8,
 				Entries = new[]
 				{
@@ -133,19 +152,23 @@ namespace NRaft.Tests.StateTests
 
 			_state.CommitIndex.ShouldBe(8);
 
-			_dispatcher
-				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
+			_response.ShouldSatisfyAllConditions(
+				() => _response.Success.ShouldBeTrue(),
+				() => _response.Term.ShouldBe(CurrentTerm),
+				() => _response.MatchIndex.ShouldBe(lastCommonEntry.Index + message.Entries.Length)
+			);
 		}
 
 		[Fact]
 		public void When_the_leader_has_a_newer_commit_index_and_there_are_less_new_entries()
 		{
+			var lastCommonEntry = _state.Log.Last();
+
 			var message = new AppendEntriesRpc
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = _state.Log.Last().Index,
-				PreviousLogTerm = _state.Log.Last().Term,
+				PreviousLogIndex = lastCommonEntry.Index,
+				PreviousLogTerm = lastCommonEntry.Term,
 				LeaderCommit = 15,
 				Entries = new[]
 				{
@@ -158,9 +181,11 @@ namespace NRaft.Tests.StateTests
 
 			_state.CommitIndex.ShouldBe(9);
 
-			_dispatcher
-				.Received()
-				.SendReply(Arg.Is<AppendEntriesResponse>(m => m.Success && m.Term == CurrentTerm));
+			_response.ShouldSatisfyAllConditions(
+				() => _response.Success.ShouldBeTrue(),
+				() => _response.Term.ShouldBe(CurrentTerm),
+				() => _response.MatchIndex.ShouldBe(lastCommonEntry.Index + message.Entries.Length)
+			);
 		}
 
 		[Fact]
