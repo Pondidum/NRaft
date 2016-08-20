@@ -23,7 +23,7 @@ namespace NRaft
 
 		//leader-only state - perhaps refactor to leaderState
 		private LightweightCache<int, int> _nextIndex;
-		private Dictionary<int, int> _matchIndex;
+		private LightweightCache<int, int> _matchIndex;
 
 
 		public State(IDispatcher dispatcher, int nodeID)
@@ -32,7 +32,7 @@ namespace NRaft
 			_nodeID = nodeID;
 
 			_nextIndex = new LightweightCache<int, int>(id => 1);
-			_matchIndex = new Dictionary<int, int>();
+			_matchIndex = new LightweightCache<int, int>(id => 1);
 
 			CurrentTerm = 0;
 			_votedFor = null;
@@ -46,6 +46,7 @@ namespace NRaft
 		public IEnumerable<LogEntry> Log => _log;
 
 		public int NextIndexFor(int nodeID) => _nextIndex[nodeID];
+		public int MatchIndexFor(int nodeID) => _matchIndex[nodeID];
 
 		public void OnAppendEntries(AppendEntriesRpc message)
 		{
@@ -76,7 +77,15 @@ namespace NRaft
 			if (message.Term != CurrentTerm)
 				return;
 
-			_nextIndex[message.FollowerID] = Math.Max(_nextIndex[message.FollowerID] - 1, 1);
+			if (message.Success)
+			{
+				_nextIndex[message.FollowerID] = message.MatchIndex + 1;
+				_matchIndex[message.FollowerID] = message.MatchIndex;
+			}
+			else
+			{
+				_nextIndex[message.FollowerID] = Math.Max(message.MatchIndex - 1, 1);
+			}
 		}
 
 
@@ -164,11 +173,6 @@ namespace NRaft
 		public void ForceType(Types type)
 		{
 			Role = type;
-		}
-
-		public void ForceNextIndex(int followerID, int index)
-		{
-			_nextIndex[followerID] = index;
 		}
 	}
 }

@@ -43,13 +43,12 @@ namespace NRaft.Tests.StateTests
 			{
 				FollowerID = 20,
 				Term = CurrentTerm,
-				Success = false
+				Success = false,
+				MatchIndex = 11,
 			};
 
-			_state.ForceNextIndex(message.FollowerID, 11);
 			_state.OnAppendEntriesResponse(message);
 
-			_state.CurrentTerm.ShouldBe(CurrentTerm);
 			_state.NextIndexFor(message.FollowerID).ShouldBe(10);
 		}
 
@@ -60,14 +59,30 @@ namespace NRaft.Tests.StateTests
 			{
 				FollowerID = 20,
 				Term = CurrentTerm,
-				Success = false
+				Success = false,
+				MatchIndex = 1,
 			};
 
-			_state.ForceNextIndex(message.FollowerID, 1);
 			_state.OnAppendEntriesResponse(message);
 
-			_state.CurrentTerm.ShouldBe(CurrentTerm);
 			_state.NextIndexFor(message.FollowerID).ShouldBe(1);
+		}
+
+		[Fact]
+		public void When_the_message_is_successful()
+		{
+			var message = new AppendEntriesResponse
+			{
+				FollowerID = 20,
+				Term = CurrentTerm,
+				Success = true,
+				MatchIndex = 10,
+			};
+
+			_state.OnAppendEntriesResponse(message);
+
+			_state.NextIndexFor(message.FollowerID).ShouldBe(11);
+			_state.MatchIndexFor(message.FollowerID).ShouldBe(10);
 		}
 	}
 }
