@@ -68,6 +68,7 @@
     <Compile Include="Scratchpad.cs" />
     <Compile Include="StateTests\OnAppendEntriesResponseTests.cs" />
     <Compile Include="StateTests\OnAppendEntriesTests.cs" />
+    <Compile Include="StateTests\OnRequestVoteResponseTests.cs" />
     <Compile Include="StateTests\OnRequestVoteTests.cs" />
   </ItemGroup>
   <ItemGroup>

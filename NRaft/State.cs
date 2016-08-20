@@ -21,10 +21,12 @@ namespace NRaft
 		public int CommitIndex { get; private set; }
 		private int _lastApplied;
 
-		//leader-only state - perhaps refactor to leaderState
-		private LightweightCache<int, int> _nextIndex;
-		private LightweightCache<int, int> _matchIndex;
+		//leader-only state - perhaps subclass or extract
+		private readonly LightweightCache<int, int> _nextIndex;
+		private readonly LightweightCache<int, int> _matchIndex;
 
+		//candidate0only state - perhaps subclass or extract
+		private readonly HashSet<int> _votesResponded;
 
 		public State(IDispatcher dispatcher, int nodeID)
 		{
@@ -33,6 +35,8 @@ namespace NRaft
 
 			_nextIndex = new LightweightCache<int, int>(id => 1);
 			_matchIndex = new LightweightCache<int, int>(id => 1);
+
+			_votesResponded = new HashSet<int>();
 
 			CurrentTerm = 0;
 			_votedFor = null;
@@ -44,6 +48,7 @@ namespace NRaft
 		}
 
 		public IEnumerable<LogEntry> Log => _log;
+		public IEnumerable<int> VotesResponded => _votesResponded;
 
 		public int NextIndexFor(int nodeID) => _nextIndex[nodeID];
 		public int MatchIndexFor(int nodeID) => _matchIndex[nodeID];
@@ -58,17 +63,6 @@ namespace NRaft
 				Success = success,
 				Term = CurrentTerm,
 				MatchIndex = success ? message.PreviousLogIndex + message.Entries.Length : 0
-			});
-		}
-
-		public void OnRequestVote(RequestVoteRpc message)
-		{
-			var voteGranted = RequestVote(message);
-
-			_dispatcher.SendReply(new RequestVoteResponse
-			{
-				Term = CurrentTerm,
-				VoteGranted = voteGranted
 			});
 		}
 
@@ -88,6 +82,24 @@ namespace NRaft
 			}
 		}
 
+		public void OnRequestVote(RequestVoteRpc message)
+		{
+			var voteGranted = RequestVote(message);
+
+			_dispatcher.SendReply(new RequestVoteResponse
+			{
+				Term = CurrentTerm,
+				VoteGranted = voteGranted
+			});
+		}
+
+		public void OnRequestVoteResponse(RequestVoteResponse message)
+		{
+			if (message.Term != CurrentTerm)
+				return;
+
+			throw new NotImplementedException();
+		}
 
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
 		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
