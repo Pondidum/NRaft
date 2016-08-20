@@ -43,6 +43,7 @@
     <Compile Include="AppendEntriesResponse.cs" />
     <Compile Include="AppendEntriesRpc.cs" />
     <Compile Include="IDispatcher.cs" />
+    <Compile Include="LightweightCache.cs" />
     <Compile Include="LogEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestVoteResponse.cs" />

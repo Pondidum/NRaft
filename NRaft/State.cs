@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -11,7 +12,7 @@ namespace NRaft
 		private readonly int _nodeID;
 
 		//need to be persistent store
-		private int _currentTerm;
+		public int CurrentTerm { get; private set; }
 		private int? _votedFor;
 		private LogEntry[] _log;
 
@@ -21,15 +22,19 @@ namespace NRaft
 		private int _lastApplied;
 
 		//leader-only state - perhaps refactor to leaderState
-		private int _nextIndex;
-		private int _matchIndex;
+		private LightweightCache<int, int> _nextIndex;
+		private Dictionary<int, int> _matchIndex;
 
 
 		public State(IDispatcher dispatcher, int nodeID)
 		{
 			_dispatcher = dispatcher;
 			_nodeID = nodeID;
-			_currentTerm = 0;
+
+			_nextIndex = new LightweightCache<int, int>(id => 1);
+			_matchIndex = new Dictionary<int, int>();
+
+			CurrentTerm = 0;
 			_votedFor = null;
 			_log = Enumerable.Empty<LogEntry>().ToArray();
 			Role = Types.Follower;
@@ -40,6 +45,7 @@ namespace NRaft
 
 		public IEnumerable<LogEntry> Log => _log;
 
+		public int NextIndexFor(int nodeID) => _nextIndex[nodeID];
 
 		public void OnAppendEntries(AppendEntriesRpc message)
 		{
@@ -48,7 +54,7 @@ namespace NRaft
 			_dispatcher.SendReply(new AppendEntriesResponse
 			{
 				Success = success,
-				Term = _currentTerm
+				Term = CurrentTerm
 			});
 		}
 
@@ -58,9 +64,17 @@ namespace NRaft
 
 			_dispatcher.SendReply(new RequestVoteResponse
 			{
-				Term = _currentTerm,
+				Term = CurrentTerm,
 				VoteGranted = voteGranted
 			});
+		}
+
+		public void OnAppendEntriesResponse(AppendEntriesResponse message)
+		{
+			if (message.Term != CurrentTerm)
+				return;
+
+			_nextIndex[message.FollowerID] = Math.Max(_nextIndex[message.FollowerID] - 1, 1);
 		}
 
 
@@ -72,7 +86,7 @@ namespace NRaft
 			var logOk = message.LastLogTerm > LastTerm()
 				|| (message.LastLogTerm == LastTerm() && message.LastLogIndex >= LastIndex());
 
-			var grant = message.Term == _currentTerm
+			var grant = message.Term == CurrentTerm
 				&& logOk
 				&& (_votedFor.HasValue == false || _votedFor.Value == message.CandidateID);
 
@@ -85,7 +99,7 @@ namespace NRaft
 
 		private bool AppendEntries(AppendEntriesRpc message)
 		{
-			if (message.Term > _currentTerm)
+			if (message.Term > CurrentTerm)
 				return false;
 
 			var logOk = message.PreviousLogIndex == 0
@@ -95,16 +109,16 @@ namespace NRaft
 					&& message.PreviousLogTerm == _log.Single(e => e.Index == message.PreviousLogIndex).Term
 				);
 
-			if (message.Term < _currentTerm || (message.Term == _currentTerm && Role == Types.Follower && logOk == false))
+			if (message.Term < CurrentTerm || (message.Term == CurrentTerm && Role == Types.Follower && logOk == false))
 				return false;
 
-			if (message.Term == _currentTerm && Role == Types.Candidate)
+			if (message.Term == CurrentTerm && Role == Types.Candidate)
 			{
 				Role = Types.Follower;
 				return true;
 			}
 
-			if (message.Term == _currentTerm && Role == Types.Follower && logOk)
+			if (message.Term == CurrentTerm && Role == Types.Follower && logOk)
 			{
 				_log = MergeChangeSets(_log, message.Entries);
 				CommitIndex = Math.Min(message.LeaderCommit, _log.Last().Index);
@@ -127,7 +141,7 @@ namespace NRaft
 
 		public void ForceTerm(int term)
 		{
-			_currentTerm = term;
+			CurrentTerm = term;
 		}
 
 		public void ForceLog(params LogEntry[] log)
@@ -148,6 +162,11 @@ namespace NRaft
 		public void ForceType(Types type)
 		{
 			Role = type;
+		}
+
+		public void ForceNextIndex(int followerID, int index)
+		{
+			_nextIndex[followerID] = index;
 		}
 	}
 }
