@@ -27,6 +27,7 @@ namespace NRaft
 
 		//candidate0only state - perhaps subclass or extract
 		private readonly HashSet<int> _votesResponded;
+		private readonly HashSet<int> _votesGranted;
 
 		public State(IDispatcher dispatcher, int nodeID)
 		{
@@ -37,6 +38,7 @@ namespace NRaft
 			_matchIndex = new LightweightCache<int, int>(id => 1);
 
 			_votesResponded = new HashSet<int>();
+			_votesGranted = new HashSet<int>();
 
 			CurrentTerm = 0;
 			_votedFor = null;
@@ -49,6 +51,7 @@ namespace NRaft
 
 		public IEnumerable<LogEntry> Log => _log;
 		public IEnumerable<int> VotesResponded => _votesResponded;
+		public IEnumerable<int> VotesGranted => _votesGranted;
 
 		public int NextIndexFor(int nodeID) => _nextIndex[nodeID];
 		public int MatchIndexFor(int nodeID) => _matchIndex[nodeID];
@@ -88,6 +91,7 @@ namespace NRaft
 
 			_dispatcher.SendReply(new RequestVoteResponse
 			{
+				NodeID = _nodeID,
 				Term = CurrentTerm,
 				VoteGranted = voteGranted
 			});
@@ -98,7 +102,10 @@ namespace NRaft
 			if (message.Term != CurrentTerm)
 				return;
 
-			throw new NotImplementedException();
+			_votesResponded.Add(message.NodeID);
+
+			if (message.VoteGranted)
+				_votesGranted.Add(message.NodeID);
 		}
 
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;

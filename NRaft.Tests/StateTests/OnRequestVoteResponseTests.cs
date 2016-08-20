@@ -31,6 +31,39 @@ namespace NRaft.Tests.StateTests
 			_state.OnRequestVoteResponse(message);
 
 			_state.VotesResponded.ShouldBeEmpty();
+			_state.VotesGranted.ShouldBeEmpty();
+		}
+
+		[Fact]
+		public void When_the_terms_match_but_the_vote_was_not_granted()
+		{
+			var message = new RequestVoteResponse
+			{
+				NodeID = 30,
+				Term = CurrentTerm,
+				VoteGranted = false
+			};
+
+			_state.OnRequestVoteResponse(message);
+
+			_state.VotesResponded.ShouldBe(new[] { message.NodeID });
+			_state.VotesGranted.ShouldBeEmpty();
+		}
+
+		[Fact]
+		public void When_the_terms_match_and_the_vote_was_granted()
+		{
+			var message = new RequestVoteResponse
+			{
+				NodeID = 30,
+				Term = CurrentTerm,
+				VoteGranted = true
+			};
+
+			_state.OnRequestVoteResponse(message);
+
+			_state.VotesResponded.ShouldBe(new[] { message.NodeID });
+			_state.VotesGranted.ShouldBe(new[] { message.NodeID });
 		}
 	}
 }
