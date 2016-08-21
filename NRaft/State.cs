@@ -110,7 +110,23 @@ namespace NRaft
 
 		public void BecomeCandidate()
 		{
-			throw new NotImplementedException();
+			Role = Types.Candidate;
+			CurrentTerm++;
+
+			OnRequestVoteResponse(new RequestVoteResponse
+			{
+				NodeID = _nodeID,
+				Term = CurrentTerm,
+				VoteGranted = true
+			});
+
+			_dispatcher.RequestVotes(new RequestVoteRpc
+			{
+				CandidateID = _nodeID,
+				Term = CurrentTerm,
+				LastLogIndex =  LastIndex(),
+				LastLogTerm = LastTerm()
+			});
 		}
 
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
