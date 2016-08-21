@@ -4,5 +4,7 @@ namespace NRaft
 	{
 		void SendReply(AppendEntriesResponse message);
 		void SendReply(RequestVoteResponse message);
+
+		void RequestVotes(RequestVoteRpc message);
 	}
 }

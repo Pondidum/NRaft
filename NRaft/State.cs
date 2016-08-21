@@ -108,6 +108,11 @@ namespace NRaft
 				_votesGranted.Add(message.NodeID);
 		}
 
+		public void BecomeCandidate()
+		{
+			throw new NotImplementedException();
+		}
+
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
 		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
 

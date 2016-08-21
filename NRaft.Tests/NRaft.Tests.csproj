@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scratchpad.cs" />
+    <Compile Include="StateTests\BecomeCandidateTests.cs" />
     <Compile Include="StateTests\OnAppendEntriesResponseTests.cs" />
     <Compile Include="StateTests\OnAppendEntriesTests.cs" />
     <Compile Include="StateTests\OnRequestVoteResponseTests.cs" />
