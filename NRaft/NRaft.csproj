@@ -49,6 +49,7 @@
     <Compile Include="RequestVoteResponse.cs" />
     <Compile Include="RequestVoteRpc.cs" />
     <Compile Include="State.cs" />
+    <Compile Include="Timeout.cs" />
     <Compile Include="Types.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
