@@ -6,5 +6,6 @@ namespace NRaft
 		void SendReply(RequestVoteResponse message);
 
 		void RequestVotes(RequestVoteRpc message);
+		void SendHeartbeat(AppendEntriesRpc message);
 	}
 }

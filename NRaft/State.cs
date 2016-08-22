@@ -10,6 +10,7 @@ namespace NRaft
 	{
 		private readonly IDispatcher _dispatcher;
 		private readonly int _nodeID;
+		private readonly HashSet<int> _knownNodes;
 
 		//need to be persistent store
 		public int CurrentTerm { get; private set; }
@@ -33,6 +34,7 @@ namespace NRaft
 		{
 			_dispatcher = dispatcher;
 			_nodeID = nodeID;
+			_knownNodes = new HashSet<int>();
 
 			_nextIndex = new LightweightCache<int, int>(id => 1);
 			_matchIndex = new LightweightCache<int, int>(id => 1);
@@ -49,6 +51,7 @@ namespace NRaft
 			_lastApplied = 0;
 		}
 
+		public IEnumerable<int> KnownNodes => _knownNodes;
 		public IEnumerable<LogEntry> Log => _log;
 		public IEnumerable<int> VotesResponded => _votesResponded;
 		public IEnumerable<int> VotesGranted => _votesGranted;
@@ -213,6 +216,14 @@ namespace NRaft
 		public void ForceType(Types type)
 		{
 			Role = type;
+		}
+
+		public void ForceKnownNodes(params int[] nodeIDs)
+		{
+			_knownNodes.Clear();
+
+			foreach (var nodeID in nodeIDs)
+				_knownNodes.Add(nodeID);
 		}
 	}
 }
