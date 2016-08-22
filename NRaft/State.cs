@@ -132,6 +132,44 @@ namespace NRaft
 			});
 		}
 
+		public void BecomeLeader()
+		{
+			Role = Types.Leader;
+
+			var last = LastIndex() + 1;
+
+			foreach (var nodeID in KnownNodes)
+				_nextIndex[nodeID] = last;
+
+			foreach (var nodeID in KnownNodes)
+				_matchIndex[nodeID] = 0;
+
+			foreach (var nodeID in KnownNodes)
+			{
+				var prevIndex = _nextIndex[nodeID] - 1;
+				var prevTerm = prevIndex > 0 ? Log.Single(e => e.Index == prevIndex).Term : 0;
+
+				var lastEntry = Math.Min(Log.Last().Index, _nextIndex[nodeID]);
+
+				var start = _nextIndex[nodeID];
+				var entries = Log
+					.SkipWhile(e => e.Index != start)
+					.TakeWhile(e => e.Index != lastEntry)
+					.ToArray();
+
+				_dispatcher.SendHeartbeat(new AppendEntriesRpc
+				{
+					LeaderID = _nodeID,
+					RecipientID = nodeID,
+					Term =  CurrentTerm,
+					PreviousLogIndex = prevIndex,
+					PreviousLogTerm = prevTerm,
+					LeaderCommit = Math.Min(CommitIndex, lastEntry),
+					Entries = entries
+				});
+			}
+		}
+
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
 		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
 

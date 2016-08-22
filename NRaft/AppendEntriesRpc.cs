@@ -13,6 +13,8 @@ namespace NRaft
 		public LogEntry[] Entries { get; set; }
 		public int LeaderCommit { get; set; }
 
+		public int RecipientID { get; set; }
+
 		public AppendEntriesRpc()
 		{
 			Entries = Enumerable.Empty<LogEntry>().ToArray();
