@@ -149,7 +149,7 @@ namespace NRaft
 				var prevIndex = _nextIndex[nodeID] - 1;
 				var prevTerm = prevIndex > 0 ? Log.Single(e => e.Index == prevIndex).Term : 0;
 
-				var lastEntry = Math.Min(Log.Last().Index, _nextIndex[nodeID]);
+				var lastEntry = Math.Min(LastIndex(), _nextIndex[nodeID]);
 
 				var start = _nextIndex[nodeID];
 				var entries = Log
@@ -213,7 +213,7 @@ namespace NRaft
 			if (message.Term == CurrentTerm && Role == Types.Follower && logOk)
 			{
 				_log = MergeChangeSets(_log, message.Entries);
-				CommitIndex = Math.Min(message.LeaderCommit, _log.Last().Index);
+				CommitIndex = Math.Min(message.LeaderCommit, LastIndex());
 				return true;
 			}
 
