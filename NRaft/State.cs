@@ -144,6 +144,11 @@ namespace NRaft
 			foreach (var nodeID in KnownNodes)
 				_matchIndex[nodeID] = 0;
 
+			SendAppendEntries();
+		}
+
+		public void SendAppendEntries()
+		{
 			foreach (var nodeID in KnownNodes)
 			{
 				var prevIndex = _nextIndex[nodeID] - 1;
@@ -153,15 +158,15 @@ namespace NRaft
 
 				var start = _nextIndex[nodeID];
 				var entries = Log
-					.SkipWhile(e => e.Index != start)
-					.TakeWhile(e => e.Index != lastEntry)
+					.SkipWhile(e => e.Index < start)
+					.TakeWhile(e => e.Index <= lastEntry)
 					.ToArray();
 
 				_dispatcher.SendHeartbeat(new AppendEntriesRpc
 				{
 					LeaderID = _nodeID,
 					RecipientID = nodeID,
-					Term =  CurrentTerm,
+					Term = CurrentTerm,
 					PreviousLogIndex = prevIndex,
 					PreviousLogTerm = prevTerm,
 					LeaderCommit = Math.Min(CommitIndex, lastEntry),
