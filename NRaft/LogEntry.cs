@@ -6,7 +6,7 @@ namespace NRaft
 	{
 		public int Index { get; set; }
 		public int Term { get; set; }
-		public string Command { get; set; }
+		public object Command { get; set; }
 
 		public override bool Equals(object obj)
 		{

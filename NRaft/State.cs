@@ -175,6 +175,21 @@ namespace NRaft
 			}
 		}
 
+		public void OnClientRequest(object value)
+		{
+			if (Role != Types.Leader)
+				return;
+
+			var newEntry = new LogEntry
+			{
+				Index = LastIndex() + 1,
+				Term = CurrentTerm,
+				Command = value
+			};
+
+			_log = Log.Concat(new[] { newEntry }).ToArray();
+		}
+
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
 		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
 

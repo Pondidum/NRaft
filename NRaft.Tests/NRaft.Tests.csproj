@@ -70,6 +70,7 @@
     <Compile Include="StateTests\BecomeLeaderTests.cs" />
     <Compile Include="StateTests\OnAppendEntriesResponseTests.cs" />
     <Compile Include="StateTests\OnAppendEntriesTests.cs" />
+    <Compile Include="StateTests\OnClientRequestTests.cs" />
     <Compile Include="StateTests\OnRequestVoteResponseTests.cs" />
     <Compile Include="StateTests\OnRequestVoteTests.cs" />
     <Compile Include="StateTests\SendAppendEntriesTests.cs" />
