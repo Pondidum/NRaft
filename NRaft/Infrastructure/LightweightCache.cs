@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace NRaft
+namespace NRaft.Infrastructure
 {
 	//stripped down version of structuremaps's cache
 	//https://github.com/structuremap/structuremap/blob/master/src/StructureMap/Util/LightweightCache.cs

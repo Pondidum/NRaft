@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NRaft
+namespace NRaft.Infrastructure
 {
 	public class Timeout : IDisposable
 	{
