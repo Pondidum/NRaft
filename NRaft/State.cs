@@ -148,7 +148,7 @@ namespace NRaft
 			if (Role != Types.Candidate)
 				return;
 
-			if (_quorum.Any(q => q.SetEquals(_votesGranted)) == false)
+			if (_quorum.Any(q => q.IsSubsetOf(_votesGranted)) == false)
 				return;
 
 			Role = Types.Leader;

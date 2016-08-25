@@ -24,7 +24,7 @@ namespace NRaft.Tests.StateTests
 
 			_state = new State(_dispatcher, NodeID);
 
-			_state.ForceType(Types.Candidate);
+			_state.BecomeCandidate();
 			_state.ForceCommitIndex(3);
 			_state.ForceTerm(2);
 			_state.ForceLog(
