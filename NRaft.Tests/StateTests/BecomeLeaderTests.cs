@@ -24,6 +24,7 @@ namespace NRaft.Tests.StateTests
 
 			_state = new State(_dispatcher, NodeID);
 
+			_state.ForceType(Types.Candidate);
 			_state.ForceCommitIndex(3);
 			_state.ForceTerm(2);
 			_state.ForceLog(
@@ -34,17 +35,46 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 5, Term = 2 }
 			);
 
-			_state.ForceKnownNodes(15);
-
-			_state.BecomeLeader();
+			_state.AddNodeToCluster(15);
+			_state.OnRequestVoteResponse(new RequestVoteResponse
+			{
+				NodeID = 15,
+				Term = _state.CurrentTerm,
+				VoteGranted = true
+			});
 		}
 
 		[Fact]
-		public void The_role_changes() => _state.Role.ShouldBe(Types.Leader);
+		public void If_the_node_is_not_a_candidate()
+		{
+			_state.ForceType(Types.Follower);
+			_state.BecomeLeader();
+
+			_state.Role.ShouldBe(Types.Follower);
+		}
+
+		[Fact]
+		public void When_a_vote_has_not_been_granted()
+		{
+			_state.ResetVotes();
+
+			_state.BecomeLeader();
+
+			_state.Role.ShouldBe(Types.Candidate);
+		}
+
+		[Fact]
+		public void The_role_changes()
+		{
+			_state.BecomeLeader();
+			_state.Role.ShouldBe(Types.Leader);
+		}
 
 		[Fact]
 		public void The_next_index_for_every_other_client_is_set_to_last_log_index()
 		{
+			_state.BecomeLeader();
+
 			var nextLogIndex = _state.Log.Last().Index + 1;
 
 			var outcomes = _state
@@ -58,6 +88,8 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void The_match_index_for_every_other_client_is_set_to_zero()
 		{
+			_state.BecomeLeader();
+
 			var outcomes = _state
 				.KnownNodes
 				.Select(node => new Action(() => _state.MatchIndexFor(node).ShouldBe(0)))
@@ -69,6 +101,8 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void It_sends_append_entries_to_all()
 		{
+			_state.BecomeLeader();
+
 			var index = _state.NextIndexFor(_heartbeat.RecipientID) - 1;
 
 			_heartbeat.ShouldSatisfyAllConditions(

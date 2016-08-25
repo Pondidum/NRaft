@@ -11,7 +11,9 @@ namespace NRaft
 	{
 		private readonly IDispatcher _dispatcher;
 		private readonly int _nodeID;
+
 		private readonly HashSet<int> _knownNodes;
+		private HashSet<HashSet<int>> _quorum;
 
 		//need to be persistent store
 		public int CurrentTerm { get; private set; }
@@ -30,12 +32,14 @@ namespace NRaft
 		//candidate0only state - perhaps subclass or extract
 		private readonly HashSet<int> _votesResponded;
 		private readonly HashSet<int> _votesGranted;
+		
 
 		public State(IDispatcher dispatcher, int nodeID)
 		{
 			_dispatcher = dispatcher;
 			_nodeID = nodeID;
 			_knownNodes = new HashSet<int>();
+			_quorum = new HashSet<HashSet<int>>();
 
 			_nextIndex = new LightweightCache<int, int>(id => 1);
 			_matchIndex = new LightweightCache<int, int>(id => 1);
@@ -112,6 +116,12 @@ namespace NRaft
 				_votesGranted.Add(message.NodeID);
 		}
 
+		public void ResetVotes()
+		{
+			_votesResponded.Clear();
+			_votesGranted.Clear();
+		}
+
 		public void BecomeCandidate()
 		{
 			Role = Types.Candidate;
@@ -135,6 +145,12 @@ namespace NRaft
 
 		public void BecomeLeader()
 		{
+			if (Role != Types.Candidate)
+				return;
+
+			if (_quorum.Any(q => q.SetEquals(_votesGranted)) == false)
+				return;
+
 			Role = Types.Leader;
 
 			var last = LastIndex() + 1;
@@ -189,6 +205,12 @@ namespace NRaft
 			};
 
 			_log = Log.Concat(new[] { newEntry }).ToArray();
+		}
+
+		public void AddNodeToCluster(int nodeID)
+		{
+			_knownNodes.Add(nodeID);
+			_quorum = Quorum.GenerateAllPossibilities(_knownNodes.ToArray());
 		}
 
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
@@ -275,14 +297,6 @@ namespace NRaft
 		public void ForceType(Types type)
 		{
 			Role = type;
-		}
-
-		public void ForceKnownNodes(params int[] nodeIDs)
-		{
-			_knownNodes.Clear();
-
-			foreach (var nodeID in nodeIDs)
-				_knownNodes.Add(nodeID);
 		}
 	}
 }

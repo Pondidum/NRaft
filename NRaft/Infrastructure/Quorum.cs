@@ -5,24 +5,24 @@ namespace NRaft.Infrastructure
 {
 	public static class Quorum
 	{
-		public static IEnumerable<int[]> GenerateAllPossibilities(int[] nodeIDs)
+		public static HashSet<HashSet<int>> GenerateAllPossibilities(int[] nodeIDs)
 		{
 			var ps = PowerSet(nodeIDs);
-			var quorum = ps.Where(i => i.Length * 2 > nodeIDs.Length);
+			var quorum = ps.Where(i => i.Count * 2 > nodeIDs.Length);
 
-			return quorum;
+			return new HashSet<HashSet<int>>(quorum);
 		}
 
-		private static List<T[]> PowerSet<T>(T[] input)
+		private static List<HashSet<T>> PowerSet<T>(T[] input)
 		{
 			var n = input.Length;
 			var powerSetCount = 1 << n; // Power set contains 2^N subsets.
 
-			var ans = new List<T[]>();
+			var ans = new List<HashSet<T>>();
 
 			for (var setMask = 0; setMask < powerSetCount; setMask++)
 			{
-				var s = new List<T>();
+				var s = new HashSet<T>();
 				for (var i = 0; i < n; i++)
 				{
 					// Checking whether i'th element of input collection should go to the current subset.
@@ -31,7 +31,7 @@ namespace NRaft.Infrastructure
 						s.Add(input[i]);
 					}
 				}
-				ans.Add(s.ToArray());
+				ans.Add(s);
 			}
 
 			return ans;

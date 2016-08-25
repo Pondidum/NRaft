@@ -42,7 +42,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_there_is_one_node_and_no_pending_entries_to_be_sent()
 		{
-			_state.ForceKnownNodes(456);
+			_state.AddNodeToCluster(456);
 
 			_state.SendAppendEntries();
 
@@ -64,7 +64,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_there_is_one_node_and_some_entries_to_be_sent()
 		{
-			_state.ForceKnownNodes(456);
+			_state.AddNodeToCluster(456);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = _state.CurrentTerm },
 				new LogEntry { Index = 2, Term = _state.CurrentTerm }
@@ -96,7 +96,9 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_there_are_multiple_nodes_and_some_entries_to_be_sent()
 		{
-			_state.ForceKnownNodes(456, 789);
+			_state.AddNodeToCluster(456);
+			_state.AddNodeToCluster(789);
+
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = _state.CurrentTerm },
 				new LogEntry { Index = 2, Term = _state.CurrentTerm }
