@@ -213,6 +213,10 @@ namespace NRaft
 			_quorum = Quorum.GenerateAllPossibilities(_knownNodes.ToArray());
 		}
 
+		public void AdvanceCommitIndex()
+		{
+		}
+
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
 		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
 
