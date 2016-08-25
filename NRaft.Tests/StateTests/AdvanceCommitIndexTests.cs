@@ -17,6 +17,7 @@ namespace NRaft.Tests.StateTests
 			_dispatcher = Substitute.For<IDispatcher>();
 
 			_state = new State(_dispatcher, NodeID);
+			_state.BecomeCandidate();
 			_state.ForceType(Types.Leader);
 			_state.ForceCommitIndex(2);
 			_state.ForceLog(
@@ -89,7 +90,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.AdvanceCommitIndex();
 
-			_state.CommitIndex.ShouldBe(3);
+			_state.CommitIndex.ShouldBe(2);
 		}
 
 		[Fact]

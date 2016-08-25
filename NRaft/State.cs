@@ -138,7 +138,7 @@ namespace NRaft
 			{
 				CandidateID = _nodeID,
 				Term = CurrentTerm,
-				LastLogIndex =  LastIndex(),
+				LastLogIndex = LastIndex(),
 				LastLogTerm = LastTerm()
 			});
 		}
@@ -215,6 +215,24 @@ namespace NRaft
 
 		public void AdvanceCommitIndex()
 		{
+			Func<int, HashSet<int>> agree = index =>
+			{
+				var nodes = _matchIndex
+					.Dictionary
+					.Where(pair => pair.Value >= index)
+					.Select(pair => pair.Key);
+
+				return new HashSet<int>(nodes);
+			};
+
+			var agreeIndexes = _log
+				.Select(e => e.Index)
+				.Where(index => _quorum.Any(q => q.SetEquals(agree(index))))
+				.ToArray();
+
+			if (agreeIndexes.Any() && _log.Single(e => e.Index == agreeIndexes.Max()).Term == CurrentTerm)
+				CommitIndex = agreeIndexes.Max();
+
 		}
 
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
