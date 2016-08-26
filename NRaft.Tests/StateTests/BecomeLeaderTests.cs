@@ -81,7 +81,7 @@ namespace NRaft.Tests.StateTests
 		{
 			_state.BecomeLeader();
 
-			var nextLogIndex = _state.Log.Last().Index + 1;
+			var nextLogIndex = _store.Log.Last().Index + 1;
 
 			var outcomes = _state
 				.KnownNodes
@@ -115,7 +115,7 @@ namespace NRaft.Tests.StateTests
 				() => _heartbeat.LeaderID.ShouldBe(NodeID),
 				() => _heartbeat.Term.ShouldBe(_store.CurrentTerm),
 				() => _heartbeat.PreviousLogIndex.ShouldBe(index),
-				() => _heartbeat.PreviousLogTerm.ShouldBe(_state.Log.Single(e => e.Index == index).Term),
+				() => _heartbeat.PreviousLogTerm.ShouldBe(_store.Log.Single(e => e.Index == index).Term),
 				() => _heartbeat.LeaderCommit.ShouldBe(_state.CommitIndex),
 				() => _heartbeat.Entries.ShouldBeEmpty()
 			);

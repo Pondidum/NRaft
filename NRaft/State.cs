@@ -54,7 +54,6 @@ namespace NRaft
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;
-		public IEnumerable<LogEntry> Log => _store.Log;
 		public IEnumerable<int> VotesResponded => _votesResponded;
 		public IEnumerable<int> VotesGranted => _votesGranted;
 
@@ -176,12 +175,12 @@ namespace NRaft
 			foreach (var nodeID in KnownNodes)
 			{
 				var prevIndex = _nextIndex[nodeID] - 1;
-				var prevTerm = prevIndex > 0 ? Log.Single(e => e.Index == prevIndex).Term : 0;
+				var prevTerm = prevIndex > 0 ? _store.Log.Single(e => e.Index == prevIndex).Term : 0;
 
 				var lastEntry = Math.Min(LastIndex(), _nextIndex[nodeID]);
 
 				var start = _nextIndex[nodeID];
-				var entries = Log
+				var entries = _store.Log
 					.SkipWhile(e => e.Index < start)
 					.TakeWhile(e => e.Index <= lastEntry)
 					.ToArray();
@@ -211,7 +210,7 @@ namespace NRaft
 				Command = value
 			};
 
-			_store.Log = Log.Concat(new[] { newEntry }).ToArray();
+			_store.Log = _store.Log.Concat(new[] { newEntry }).ToArray();
 		}
 
 		public void AddNodeToCluster(int nodeID)

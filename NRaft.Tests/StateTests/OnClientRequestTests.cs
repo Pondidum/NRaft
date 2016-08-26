@@ -9,14 +9,16 @@ namespace NRaft.Tests.StateTests
 {
 	public class OnClientRequestTests
 	{
+		private readonly InMemoryStore _store;
 		private readonly State _state;
 
 		public OnClientRequestTests()
 		{
-			var dispatcher = Substitute.For<IConnector>();
-			var store = new InMemoryStore();
+			_store = new InMemoryStore();
 
-			_state = new State(store, dispatcher, 1234);
+			var dispatcher = Substitute.For<IConnector>();
+
+			_state = new State(_store, dispatcher, 1234);
 		}
 
 		[Fact]
@@ -24,7 +26,7 @@ namespace NRaft.Tests.StateTests
 		{
 			_state.OnClientRequest(new Dto { Value = "abc" });
 
-			_state.Log.ShouldBeEmpty();
+			_store.Log.ShouldBeEmpty();
 		}
 
 		[Fact]
@@ -35,7 +37,7 @@ namespace NRaft.Tests.StateTests
 			_state.ForceType(Types.Leader);
 			_state.OnClientRequest(value);
 
-			_state.Log.Single().Command.ShouldBe(value);
+			_store.Log.Single().Command.ShouldBe(value);
 		}
 
 

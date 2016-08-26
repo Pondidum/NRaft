@@ -12,8 +12,11 @@ namespace NRaft.Tests
 		{
 			var dispatcher = new InMemoryConnector();
 
-			var first = new State(new InMemoryStore(), dispatcher, 1);
-			var second = new State(new InMemoryStore(), dispatcher, 2);
+			var firstStore = new InMemoryStore();
+			var secondStore = new InMemoryStore();
+
+			var first = new State(firstStore, dispatcher, 1);
+			var second = new State(secondStore, dispatcher, 2);
 
 			first.AddNodeToCluster(2);
 			second.AddNodeToCluster(1);
@@ -35,8 +38,8 @@ namespace NRaft.Tests
 			first.CommitIndex.ShouldBe(0);
 
 			first.SendAppendEntries();
-			first.Log.Last().Command.ShouldBe("testing");
-			second.Log.Last().Command.ShouldBe("testing");
+			firstStore.Log.Last().Command.ShouldBe("testing");
+			secondStore.Log.Last().Command.ShouldBe("testing");
 
 			first.AdvanceCommitIndex();
 			first.CommitIndex.ShouldBe(1);

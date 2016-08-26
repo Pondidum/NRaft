@@ -60,8 +60,8 @@ namespace NRaft.Tests.StateTests
 		public void The_request_to_others_is_well_formed() => _response.ShouldSatisfyAllConditions(
 			() => _response.CandidateID.ShouldBe(NodeID),
 			() => _response.Term.ShouldBe(_store.CurrentTerm),
-			() => _response.LastLogIndex.ShouldBe(_state.Log.Last().Index),
-			() => _response.LastLogTerm.ShouldBe(_state.Log.Last().Term)
+			() => _response.LastLogIndex.ShouldBe(_store.Log.Last().Index),
+			() => _response.LastLogTerm.ShouldBe(_store.Log.Last().Term)
 		);
 	}
 }

@@ -57,7 +57,7 @@ namespace NRaft.Tests.StateTests
 		public void When_single_node_and_there_is_an_entry_to_commit()
 		{
 			_state.AdvanceCommitIndex();
-			_state.CommitIndex.ShouldBe(_state.Log.Last().Index);
+			_state.CommitIndex.ShouldBe(_store.Log.Last().Index);
 		}
 
 		[Fact]

@@ -54,8 +54,8 @@ namespace NRaft.Tests.StateTests
 			{
 				Term = CurrentTerm - 2,
 				CandidateID = 20,
-				LastLogIndex = _state.Log.Last().Index,
-				LastLogTerm = _state.Log.Last().Term
+				LastLogIndex = _store.Log.Last().Index,
+				LastLogTerm = _store.Log.Last().Term
 			};
 
 			_state.OnRequestVote(message);
@@ -72,8 +72,8 @@ namespace NRaft.Tests.StateTests
 			{
 				Term = CurrentTerm,
 				CandidateID = 20,
-				LastLogIndex = _state.Log.Last().Index,
-				LastLogTerm = _state.Log.Last().Term
+				LastLogIndex = _store.Log.Last().Index,
+				LastLogTerm = _store.Log.Last().Term
 			};
 
 			_store.VotedFor = 15;
@@ -108,8 +108,8 @@ namespace NRaft.Tests.StateTests
 			{
 				Term = CurrentTerm,
 				CandidateID = 20,
-				LastLogIndex = _state.Log.Last().Index,
-				LastLogTerm = _state.Log.Last().Term
+				LastLogIndex = _store.Log.Last().Index,
+				LastLogTerm = _store.Log.Last().Term
 			};
 
 			_state.OnRequestVote(message);

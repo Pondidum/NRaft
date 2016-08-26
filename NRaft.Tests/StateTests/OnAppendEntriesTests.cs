@@ -92,7 +92,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_an_existing_entry_conflicts_with_a_new_entry()
 		{
-			var lastCommonEntry = _state.Log.Single(e => e.Index == 4);
+			var lastCommonEntry = _store.Log.Single(e => e.Index == 4);
 
 			var message = new AppendEntriesRequest
 			{
@@ -107,7 +107,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnAppendEntries(message);
 
-			_state.Log.ShouldBe(new[]
+			_store.Log.ShouldBe(new[]
 			{
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },
@@ -126,7 +126,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_leader_has_a_newer_commit_index_and_there_are_no_new_entries()
 		{
-			var lastCommonEntry = _state.Log.Last();
+			var lastCommonEntry = _store.Log.Last();
 
 			var message = new AppendEntriesRequest
 			{
@@ -150,7 +150,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_leader_has_a_newer_commit_index_and_there_are_new_entries()
 		{
-			var lastCommonEntry = _state.Log.Last();
+			var lastCommonEntry = _store.Log.Last();
 
 			var message = new AppendEntriesRequest
 			{
@@ -179,7 +179,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_leader_has_a_newer_commit_index_and_there_are_less_new_entries()
 		{
-			var lastCommonEntry = _state.Log.Last();
+			var lastCommonEntry = _store.Log.Last();
 
 			var message = new AppendEntriesRequest
 			{
@@ -211,8 +211,8 @@ namespace NRaft.Tests.StateTests
 			var message = new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
-				PreviousLogIndex = _state.Log.Last().Index,
-				PreviousLogTerm = _state.Log.Last().Term,
+				PreviousLogIndex = _store.Log.Last().Index,
+				PreviousLogTerm = _store.Log.Last().Term,
 				LeaderCommit = _state.CommitIndex
 			};
 
