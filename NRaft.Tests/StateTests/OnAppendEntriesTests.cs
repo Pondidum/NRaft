@@ -39,6 +39,17 @@ namespace NRaft.Tests.StateTests
 		}
 
 		[Fact]
+		public void When_a_message_has_a_newer_term()
+		{
+			_state.OnAppendEntries(new AppendEntriesRpc
+			{
+				Term = CurrentTerm + 1,
+			});
+
+			_state.CurrentTerm.ShouldBe(CurrentTerm + 1);
+		}
+
+		[Fact]
 		public void When_a_messages_term_is_less_than_the_nodes()
 		{
 			var message = new AppendEntriesRpc

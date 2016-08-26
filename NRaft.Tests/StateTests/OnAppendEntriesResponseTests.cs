@@ -22,6 +22,17 @@ namespace NRaft.Tests.StateTests
 		}
 
 		[Fact]
+		public void When_a_message_has_a_newer_term()
+		{
+			_state.OnAppendEntriesResponse(new AppendEntriesResponse
+			{
+				Term = CurrentTerm + 1,
+			});
+
+			_state.CurrentTerm.ShouldBe(CurrentTerm + 1);
+		}
+
+		[Fact]
 		public void When_the_terms_are_not_equal()
 		{
 			var message = new AppendEntriesResponse

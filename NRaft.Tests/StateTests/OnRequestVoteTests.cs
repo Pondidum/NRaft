@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NRaft.Messages;
 using NSubstitute;
+using Shouldly;
 using Xunit;
 
 namespace NRaft.Tests.StateTests
@@ -29,6 +30,17 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 7, Term = 5 }
 			);
 			_state.ForceCommitIndex(7);
+		}
+
+		[Fact]
+		public void When_a_message_has_a_newer_term()
+		{
+			_state.OnRequestVote(new RequestVoteRpc
+			{
+				Term = CurrentTerm + 1,
+			});
+
+			_state.CurrentTerm.ShouldBe(CurrentTerm + 1);
 		}
 
 		[Fact]
