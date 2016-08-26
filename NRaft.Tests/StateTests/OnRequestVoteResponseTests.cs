@@ -40,14 +40,14 @@ namespace NRaft.Tests.StateTests
 		{
 			var message = new RequestVoteResponse
 			{
-				NodeID = 30,
+				GranterID = 30,
 				Term = CurrentTerm,
 				VoteGranted = false
 			};
 
 			_state.OnRequestVoteResponse(message);
 
-			_state.VotesResponded.ShouldBe(new[] { message.NodeID });
+			_state.VotesResponded.ShouldBe(new[] { message.GranterID });
 			_state.VotesGranted.ShouldBeEmpty();
 		}
 
@@ -56,15 +56,15 @@ namespace NRaft.Tests.StateTests
 		{
 			var message = new RequestVoteResponse
 			{
-				NodeID = 30,
+				GranterID = 30,
 				Term = CurrentTerm,
 				VoteGranted = true
 			};
 
 			_state.OnRequestVoteResponse(message);
 
-			_state.VotesResponded.ShouldBe(new[] { message.NodeID });
-			_state.VotesGranted.ShouldBe(new[] { message.NodeID });
+			_state.VotesResponded.ShouldBe(new[] { message.GranterID });
+			_state.VotesGranted.ShouldBe(new[] { message.GranterID });
 		}
 	}
 }

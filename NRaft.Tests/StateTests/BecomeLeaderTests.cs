@@ -39,7 +39,7 @@ namespace NRaft.Tests.StateTests
 			_state.AddNodeToCluster(15);
 			_state.OnRequestVoteResponse(new RequestVoteResponse
 			{
-				NodeID = 15,
+				GranterID = 15,
 				Term = _state.CurrentTerm,
 				VoteGranted = true
 			});

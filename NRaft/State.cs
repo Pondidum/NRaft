@@ -100,7 +100,8 @@ namespace NRaft
 
 			_dispatcher.SendReply(new RequestVoteResponse
 			{
-				NodeID = _nodeID,
+				CandidateID = message.CandidateID,
+				GranterID = _nodeID,
 				Term = CurrentTerm,
 				VoteGranted = voteGranted
 			});
@@ -111,10 +112,10 @@ namespace NRaft
 			if (message.Term != CurrentTerm)
 				return;
 
-			_votesResponded.Add(message.NodeID);
+			_votesResponded.Add(message.GranterID);
 
 			if (message.VoteGranted)
-				_votesGranted.Add(message.NodeID);
+				_votesGranted.Add(message.GranterID);
 		}
 
 		public void ResetVotes()
@@ -130,7 +131,7 @@ namespace NRaft
 
 			OnRequestVoteResponse(new RequestVoteResponse
 			{
-				NodeID = _nodeID,
+				GranterID = _nodeID,
 				Term = CurrentTerm,
 				VoteGranted = true
 			});
