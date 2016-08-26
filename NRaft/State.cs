@@ -24,7 +24,6 @@ namespace NRaft
 		//only in memory
 		public Types Role { get; private set; }
 		public int CommitIndex { get; private set; }
-		private int _lastApplied;
 
 		//leader-only state - perhaps subclass or extract
 		private readonly LightweightCache<int, int> _nextIndex;
@@ -54,7 +53,6 @@ namespace NRaft
 			Role = Types.Follower;
 
 			CommitIndex = 0;
-			_lastApplied = 0;
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;
