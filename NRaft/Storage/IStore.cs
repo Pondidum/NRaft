@@ -4,5 +4,6 @@
 	{
 		int CurrentTerm { get; set; }
 		int? VotedFor { get; set; }
+		LogEntry[] Log { get; set; }
 	}
 }

@@ -16,9 +16,6 @@ namespace NRaft
 		private readonly HashSet<int> _knownNodes;
 		private HashSet<HashSet<int>> _quorum;
 
-		//need to be persistent store
-		private LogEntry[] _log;
-
 		//only in memory
 		public Types Role { get; private set; }
 		public int CommitIndex { get; private set; }
@@ -46,7 +43,6 @@ namespace NRaft
 			_votesResponded = new HashSet<int>();
 			_votesGranted = new HashSet<int>();
 
-			_log = Enumerable.Empty<LogEntry>().ToArray();
 			Role = Types.Follower;
 
 			CommitIndex = 0;
@@ -58,7 +54,7 @@ namespace NRaft
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;
-		public IEnumerable<LogEntry> Log => _log;
+		public IEnumerable<LogEntry> Log => _store.Log;
 		public IEnumerable<int> VotesResponded => _votesResponded;
 		public IEnumerable<int> VotesGranted => _votesGranted;
 
@@ -215,7 +211,7 @@ namespace NRaft
 				Command = value
 			};
 
-			_log = Log.Concat(new[] { newEntry }).ToArray();
+			_store.Log = Log.Concat(new[] { newEntry }).ToArray();
 		}
 
 		public void AddNodeToCluster(int nodeID)
@@ -239,18 +235,18 @@ namespace NRaft
 				return new HashSet<int>(nodes);
 			};
 
-			var agreeIndexes = _log
+			var agreeIndexes = _store.Log
 				.Select(e => e.Index)
 				.Where(index => KnownNodes.Any() == false || _quorum.Any(q => q.SetEquals(agree(index))))
 				.ToArray();
 
-			if (agreeIndexes.Any() && _log.Single(e => e.Index == agreeIndexes.Max()).Term == _store.CurrentTerm)
+			if (agreeIndexes.Any() && _store.Log.Single(e => e.Index == agreeIndexes.Max()).Term == _store.CurrentTerm)
 				CommitIndex = agreeIndexes.Max();
 
 		}
 
-		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
-		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
+		private int LastTerm() => _store.Log.Length == 0 ? 0 : _store.Log.Last().Term;
+		private int LastIndex() => _store.Log.Length == 0 ? 0 : _store.Log.Last().Index;
 
 		private bool RequestVote(RequestVoteRequest message)
 		{
@@ -277,7 +273,7 @@ namespace NRaft
 				|| (
 					message.PreviousLogIndex > 0
 					&& message.PreviousLogIndex <= LastIndex()
-					&& message.PreviousLogTerm == _log.Single(e => e.Index == message.PreviousLogIndex).Term
+					&& message.PreviousLogTerm == _store.Log.Single(e => e.Index == message.PreviousLogIndex).Term
 				);
 
 			if (message.Term < _store.CurrentTerm || (message.Term == _store.CurrentTerm && Role == Types.Follower && logOk == false))
@@ -291,7 +287,7 @@ namespace NRaft
 
 			if (message.Term == _store.CurrentTerm && Role == Types.Follower && logOk)
 			{
-				_log = MergeChangeSets(_log, message.Entries);
+				_store.Log = MergeChangeSets(_store.Log, message.Entries);
 				CommitIndex = Math.Min(message.LeaderCommit, LastIndex());
 				return true;
 			}
@@ -322,7 +318,7 @@ namespace NRaft
 
 		public void ForceLog(params LogEntry[] log)
 		{
-			_log = log;
+			_store.Log = log;
 		}
 
 		public void ForceCommitIndex(int index)
