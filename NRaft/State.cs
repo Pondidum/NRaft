@@ -17,7 +17,6 @@ namespace NRaft
 		private HashSet<HashSet<int>> _quorum;
 
 		//need to be persistent store
-		public int CurrentTerm { get; private set; }
 		private int? _votedFor;
 		private LogEntry[] _log;
 
@@ -48,7 +47,6 @@ namespace NRaft
 			_votesResponded = new HashSet<int>();
 			_votesGranted = new HashSet<int>();
 
-			CurrentTerm = 0;
 			_votedFor = null;
 			_log = Enumerable.Empty<LogEntry>().ToArray();
 			Role = Types.Follower;
@@ -80,7 +78,7 @@ namespace NRaft
 				LeaderID = message.LeaderID,
 				FollowerID = _nodeID,
 				Success = success,
-				Term = CurrentTerm,
+				Term = _store.CurrentTerm,
 				MatchIndex = success ? message.PreviousLogIndex + message.Entries.Length : 0
 			});
 		}
@@ -89,7 +87,7 @@ namespace NRaft
 		{
 			UpdateTerm(message.Term);
 
-			if (message.Term != CurrentTerm)
+			if (message.Term != _store.CurrentTerm)
 				return;
 
 			if (message.Success)
@@ -113,7 +111,7 @@ namespace NRaft
 			{
 				CandidateID = message.CandidateID,
 				GranterID = _nodeID,
-				Term = CurrentTerm,
+				Term = _store.CurrentTerm,
 				VoteGranted = voteGranted
 			});
 		}
@@ -122,7 +120,7 @@ namespace NRaft
 		{
 			UpdateTerm(message.Term);
 
-			if (message.Term != CurrentTerm)
+			if (message.Term != _store.CurrentTerm)
 				return;
 
 			_votesResponded.Add(message.GranterID);
@@ -140,19 +138,19 @@ namespace NRaft
 		public void BecomeCandidate()
 		{
 			Role = Types.Candidate;
-			CurrentTerm++;
+			_store.CurrentTerm++;
 
 			OnRequestVoteResponse(new RequestVoteResponse
 			{
 				GranterID = _nodeID,
-				Term = CurrentTerm,
+				Term = _store.CurrentTerm,
 				VoteGranted = true
 			});
 
 			_connector.RequestVotes(new RequestVoteRequest
 			{
 				CandidateID = _nodeID,
-				Term = CurrentTerm,
+				Term = _store.CurrentTerm,
 				LastLogIndex = LastIndex(),
 				LastLogTerm = LastTerm()
 			});
@@ -198,7 +196,7 @@ namespace NRaft
 				{
 					LeaderID = _nodeID,
 					RecipientID = nodeID,
-					Term = CurrentTerm,
+					Term = _store.CurrentTerm,
 					PreviousLogIndex = prevIndex,
 					PreviousLogTerm = prevTerm,
 					LeaderCommit = Math.Min(CommitIndex, lastEntry),
@@ -215,7 +213,7 @@ namespace NRaft
 			var newEntry = new LogEntry
 			{
 				Index = LastIndex() + 1,
-				Term = CurrentTerm,
+				Term = _store.CurrentTerm,
 				Command = value
 			};
 
@@ -248,7 +246,7 @@ namespace NRaft
 				.Where(index => KnownNodes.Any() == false || _quorum.Any(q => q.SetEquals(agree(index))))
 				.ToArray();
 
-			if (agreeIndexes.Any() && _log.Single(e => e.Index == agreeIndexes.Max()).Term == CurrentTerm)
+			if (agreeIndexes.Any() && _log.Single(e => e.Index == agreeIndexes.Max()).Term == _store.CurrentTerm)
 				CommitIndex = agreeIndexes.Max();
 
 		}
@@ -261,7 +259,7 @@ namespace NRaft
 			var logOk = message.LastLogTerm > LastTerm()
 				|| (message.LastLogTerm == LastTerm() && message.LastLogIndex >= LastIndex());
 
-			var grant = message.Term == CurrentTerm
+			var grant = message.Term == _store.CurrentTerm
 				&& logOk
 				&& (_votedFor.HasValue == false || _votedFor.Value == message.CandidateID);
 
@@ -274,7 +272,7 @@ namespace NRaft
 
 		private bool AppendEntries(AppendEntriesRequest message)
 		{
-			if (message.Term > CurrentTerm)
+			if (message.Term > _store.CurrentTerm)
 				return false;
 
 			var logOk = message.PreviousLogIndex == 0
@@ -284,16 +282,16 @@ namespace NRaft
 					&& message.PreviousLogTerm == _log.Single(e => e.Index == message.PreviousLogIndex).Term
 				);
 
-			if (message.Term < CurrentTerm || (message.Term == CurrentTerm && Role == Types.Follower && logOk == false))
+			if (message.Term < _store.CurrentTerm || (message.Term == _store.CurrentTerm && Role == Types.Follower && logOk == false))
 				return false;
 
-			if (message.Term == CurrentTerm && Role == Types.Candidate)
+			if (message.Term == _store.CurrentTerm && Role == Types.Candidate)
 			{
 				Role = Types.Follower;
 				return true;
 			}
 
-			if (message.Term == CurrentTerm && Role == Types.Follower && logOk)
+			if (message.Term == _store.CurrentTerm && Role == Types.Follower && logOk)
 			{
 				_log = MergeChangeSets(_log, message.Entries);
 				CommitIndex = Math.Min(message.LeaderCommit, LastIndex());
@@ -316,17 +314,17 @@ namespace NRaft
 
 		private void UpdateTerm(int messageTerm)
 		{
-			if (messageTerm <= CurrentTerm)
+			if (messageTerm <= _store.CurrentTerm)
 				return;
 
-			CurrentTerm = messageTerm;
+			_store.CurrentTerm = messageTerm;
 			Role = Types.Follower;
 			_votedFor = null;
 		}
 
 		public void ForceTerm(int term)
 		{
-			CurrentTerm = term;
+			_store.CurrentTerm = term;
 		}
 
 		public void ForceLog(params LogEntry[] log)

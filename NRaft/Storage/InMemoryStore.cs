@@ -2,6 +2,6 @@
 {
 	public class InMemoryStore : IStore
 	{
-
+		public int CurrentTerm { get; set; }
 	}
 }

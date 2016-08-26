@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using NRaft.Infrastructure;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -13,8 +14,9 @@ namespace NRaft.Tests.StateTests
 		public OnClientRequestTests()
 		{
 			var dispatcher = Substitute.For<IConnector>();
-			
-			_state = new State(dispatcher, 1234);
+			var store = new InMemoryStore();
+
+			_state = new State(store, dispatcher, 1234);
 		}
 
 		[Fact]

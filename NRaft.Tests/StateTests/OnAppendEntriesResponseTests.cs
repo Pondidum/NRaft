@@ -1,5 +1,6 @@
 ﻿using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -10,14 +11,16 @@ namespace NRaft.Tests.StateTests
 	{
 		private const int CurrentTerm = 3;
 
+		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly State _state;
 
 		public OnAppendEntriesResponseTests()
 		{
+			_store = new InMemoryStore();
 			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_connector, 10);
+			_state = new State(_store, _connector, 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceType(Types.Leader);
 		}
@@ -30,7 +33,7 @@ namespace NRaft.Tests.StateTests
 				Term = CurrentTerm + 1,
 			});
 
-			_state.CurrentTerm.ShouldBe(CurrentTerm + 1);
+			_store.CurrentTerm.ShouldBe(CurrentTerm + 1);
 		}
 
 		[Fact]
@@ -45,7 +48,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnAppendEntriesResponse(message);
 
-			_state.CurrentTerm.ShouldBe(CurrentTerm);
+			_store.CurrentTerm.ShouldBe(CurrentTerm);
 			_state.NextIndexFor(message.FollowerID).ShouldBe(1);
 		}
 

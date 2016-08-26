@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -15,16 +16,18 @@ namespace NRaft.Tests.StateTests
 		private AppendEntriesResponse _response;
 
 		private readonly State _state;
+		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 
 		public OnAppendEntriesTests()
 		{
+			_store = new InMemoryStore();
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.SendReply(Arg.Any<AppendEntriesResponse>()))
 				.Do(cb => _response = cb.Arg<AppendEntriesResponse>());
 
-			_state = new State(_connector, 10);
+			_state = new State(_store, _connector, 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
@@ -47,7 +50,7 @@ namespace NRaft.Tests.StateTests
 				Term = CurrentTerm + 1,
 			});
 
-			_state.CurrentTerm.ShouldBe(CurrentTerm + 1);
+			_store.CurrentTerm.ShouldBe(CurrentTerm + 1);
 		}
 
 		[Fact]

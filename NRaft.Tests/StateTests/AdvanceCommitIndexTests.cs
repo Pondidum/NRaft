@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -13,12 +14,14 @@ namespace NRaft.Tests.StateTests
 
 		private readonly IConnector _connector;
 		private readonly State _state;
+		private readonly InMemoryStore _store;
 
 		public AdvanceCommitIndexTests()
 		{
+			_store = new InMemoryStore();
 			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_connector, NodeID);
+			_state = new State(_store, _connector, NodeID);
 			_state.BecomeCandidate();
 			_state.ForceType(Types.Leader);
 			_state.ForceCommitIndex(2);
@@ -80,7 +83,7 @@ namespace NRaft.Tests.StateTests
 				FollowerID = 22,
 				MatchIndex = 1,
 				Success = true,
-				Term = _state.CurrentTerm
+				Term = _store.CurrentTerm
 			});
 
 			_state.OnAppendEntriesResponse(new AppendEntriesResponse
@@ -88,7 +91,7 @@ namespace NRaft.Tests.StateTests
 				FollowerID = 33,
 				MatchIndex = 1,
 				Success = true,
-				Term = _state.CurrentTerm
+				Term = _store.CurrentTerm
 			});
 
 			_state.AdvanceCommitIndex();
@@ -107,7 +110,7 @@ namespace NRaft.Tests.StateTests
 				FollowerID = 22,
 				MatchIndex = 3,
 				Success = true,
-				Term = _state.CurrentTerm
+				Term = _store.CurrentTerm
 			});
 
 			_state.OnAppendEntriesResponse(new AppendEntriesResponse
@@ -115,7 +118,7 @@ namespace NRaft.Tests.StateTests
 				FollowerID = 33,
 				MatchIndex = 3,
 				Success = true,
-				Term = _state.CurrentTerm
+				Term = _store.CurrentTerm
 			});
 
 			_state.AdvanceCommitIndex();

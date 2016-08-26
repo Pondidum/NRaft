@@ -2,6 +2,7 @@
 using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -14,17 +15,19 @@ namespace NRaft.Tests.StateTests
 
 		private AppendEntriesRequest _heartbeat;
 
+		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly State _state;
 
 		public BecomeLeaderTests()
 		{
+			_store = new InMemoryStore();
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _heartbeat = cb.Arg<AppendEntriesRequest>());
 
-			_state = new State(_connector, NodeID);
+			_state = new State(_store, _connector, NodeID);
 
 			_state.BecomeCandidate();
 			_state.ForceCommitIndex(3);
@@ -41,7 +44,7 @@ namespace NRaft.Tests.StateTests
 			_state.OnRequestVoteResponse(new RequestVoteResponse
 			{
 				GranterID = 15,
-				Term = _state.CurrentTerm,
+				Term = _store.CurrentTerm,
 				VoteGranted = true
 			});
 		}
@@ -109,7 +112,7 @@ namespace NRaft.Tests.StateTests
 
 			_heartbeat.ShouldSatisfyAllConditions(
 				() => _heartbeat.LeaderID.ShouldBe(NodeID),
-				() => _heartbeat.Term.ShouldBe(_state.CurrentTerm),
+				() => _heartbeat.Term.ShouldBe(_store.CurrentTerm),
 				() => _heartbeat.PreviousLogIndex.ShouldBe(index),
 				() => _heartbeat.PreviousLogTerm.ShouldBe(_state.Log.Single(e => e.Index == index).Term),
 				() => _heartbeat.LeaderCommit.ShouldBe(_state.CommitIndex),

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -11,6 +12,7 @@ namespace NRaft.Tests.StateTests
 	{
 		private const int NodeID = 123;
 
+		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly State _state;
 
@@ -18,12 +20,14 @@ namespace NRaft.Tests.StateTests
 
 		public BecomeCandidateTests()
 		{
+			_store = new InMemoryStore();
+
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.RequestVotes(Arg.Any<RequestVoteRequest>()))
 				.Do(cb => _response = cb.Arg<RequestVoteRequest>());
 
-			_state = new State(_connector, NodeID);
+			_state = new State(_store, _connector, NodeID);
 
 			_state.ForceTerm(2);
 			_state.ForceLog(
@@ -41,7 +45,7 @@ namespace NRaft.Tests.StateTests
 		public void The_role_changes() => _state.Role.ShouldBe(Types.Candidate);
 
 		[Fact]
-		public void The_term_increases() => _state.CurrentTerm.ShouldBe(3);
+		public void The_term_increases() => _store.CurrentTerm.ShouldBe(3);
 
 		[Fact]
 		public void The_node_responds_to_itself() => _state.VotesResponded.ShouldBe(new[] { NodeID });
@@ -55,7 +59,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void The_request_to_others_is_well_formed() => _response.ShouldSatisfyAllConditions(
 			() => _response.CandidateID.ShouldBe(NodeID),
-			() => _response.Term.ShouldBe(_state.CurrentTerm),
+			() => _response.Term.ShouldBe(_store.CurrentTerm),
 			() => _response.LastLogIndex.ShouldBe(_state.Log.Last().Index),
 			() => _response.LastLogTerm.ShouldBe(_state.Log.Last().Term)
 		);

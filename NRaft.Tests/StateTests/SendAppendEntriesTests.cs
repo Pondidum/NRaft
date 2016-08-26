@@ -2,6 +2,7 @@
 using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -15,9 +16,11 @@ namespace NRaft.Tests.StateTests
 		private readonly IConnector _connector;
 		private readonly State _state;
 		private readonly List<AppendEntriesRequest> _messages;
+		private readonly InMemoryStore _store;
 
 		public SendAppendEntriesTests()
 		{
+			_store = new InMemoryStore();
 			_messages = new List<AppendEntriesRequest>();
 
 			_connector = Substitute.For<IConnector>();
@@ -25,15 +28,15 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _messages.Add(cb.Arg<AppendEntriesRequest>()));
 
-			_state = new State(_connector, NodeID);
+			_state = new State(_store,_connector, NodeID);
 		}
 
 		[Fact]
 		public void When_there_are_no_nodes_to_send_to()
 		{
 			_state.ForceLog(
-				new LogEntry { Index = 1, Term = _state.CurrentTerm },
-				new LogEntry { Index = 2, Term = _state.CurrentTerm }
+				new LogEntry { Index = 1, Term = _store.CurrentTerm },
+				new LogEntry { Index = 2, Term = _store.CurrentTerm }
 			);
 
 			_state.SendAppendEntries();
@@ -54,7 +57,7 @@ namespace NRaft.Tests.StateTests
 
 			message.ShouldSatisfyAllConditions(
 				() => message.LeaderID.ShouldBe(NodeID),
-				() => message.Term.ShouldBe(_state.CurrentTerm),
+				() => message.Term.ShouldBe(_store.CurrentTerm),
 				() => message.RecipientID.ShouldBe(456),
 				() => message.LeaderCommit.ShouldBe(0),
 				() => message.PreviousLogIndex.ShouldBe(0),
@@ -68,8 +71,8 @@ namespace NRaft.Tests.StateTests
 		{
 			_state.AddNodeToCluster(456);
 			_state.ForceLog(
-				new LogEntry { Index = 1, Term = _state.CurrentTerm },
-				new LogEntry { Index = 2, Term = _state.CurrentTerm }
+				new LogEntry { Index = 1, Term = _store.CurrentTerm },
+				new LogEntry { Index = 2, Term = _store.CurrentTerm }
 			);
 
 			_state.SendAppendEntries();
@@ -80,17 +83,17 @@ namespace NRaft.Tests.StateTests
 
 			message.ShouldSatisfyAllConditions(
 				() => message.LeaderID.ShouldBe(NodeID),
-				() => message.Term.ShouldBe(_state.CurrentTerm),
+				() => message.Term.ShouldBe(_store.CurrentTerm),
 				() => message.RecipientID.ShouldBe(456),
 				() => message.LeaderCommit.ShouldBe(0),
 				() => message.PreviousLogIndex.ShouldBe(0),
 				() => message.PreviousLogTerm.ShouldBe(0),
 				() => message.Entries.ShouldBe(new[]
 				{
-					new LogEntry { Index = 1, Term = _state.CurrentTerm },
+					new LogEntry { Index = 1, Term = _store.CurrentTerm },
 					//currently the impl is only sending 1 entry at a time.
 					//future optimisation will support multiple
-					//new LogEntry { Index = 2, Term = _state.CurrentTerm }
+					//new LogEntry { Index = 2, Term = _store.CurrentTerm }
 				})
 			);
 		}
@@ -102,8 +105,8 @@ namespace NRaft.Tests.StateTests
 			_state.AddNodeToCluster(789);
 
 			_state.ForceLog(
-				new LogEntry { Index = 1, Term = _state.CurrentTerm },
-				new LogEntry { Index = 2, Term = _state.CurrentTerm }
+				new LogEntry { Index = 1, Term = _store.CurrentTerm },
+				new LogEntry { Index = 2, Term = _store.CurrentTerm }
 			);
 
 			_state.SendAppendEntries();

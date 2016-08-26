@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -13,13 +14,15 @@ namespace NRaft.Tests.StateTests
 		private const int CurrentTerm = 5;
 
 		private readonly State _state;
+		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 
 		public OnRequestVoteTests()
 		{
+			_store = new InMemoryStore();
 			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_connector, 10);
+			_state = new State(_store, _connector, 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
@@ -41,7 +44,7 @@ namespace NRaft.Tests.StateTests
 				Term = CurrentTerm + 1,
 			});
 
-			_state.CurrentTerm.ShouldBe(CurrentTerm + 1);
+			_store.CurrentTerm.ShouldBe(CurrentTerm + 1);
 		}
 
 		[Fact]
