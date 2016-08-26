@@ -7,7 +7,7 @@ namespace NRaft.Infrastructure
 {
 	//stripped down version of structuremaps's cache
 	//https://github.com/structuremap/structuremap/blob/master/src/StructureMap/Util/LightweightCache.cs
-	internal class LightweightCache<TKey, TValue> : IEnumerable<TValue>
+	public class LightweightCache<TKey, TValue> : IEnumerable<TValue>
 	{
 		private readonly IDictionary<TKey, TValue> _values;
 		private readonly Func<TKey, TValue> _onMissing;
