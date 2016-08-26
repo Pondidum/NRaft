@@ -67,6 +67,8 @@ namespace NRaft
 
 		public void OnAppendEntries(AppendEntriesRpc message)
 		{
+			UpdateTerm(message.Term);
+
 			var success = AppendEntries(message);
 
 			_dispatcher.SendReply(new AppendEntriesResponse
@@ -80,6 +82,8 @@ namespace NRaft
 
 		public void OnAppendEntriesResponse(AppendEntriesResponse message)
 		{
+			UpdateTerm(message.Term);
+
 			if (message.Term != CurrentTerm)
 				return;
 
@@ -96,6 +100,8 @@ namespace NRaft
 
 		public void OnRequestVote(RequestVoteRpc message)
 		{
+			UpdateTerm(message.Term);
+
 			var voteGranted = RequestVote(message);
 
 			_dispatcher.SendReply(new RequestVoteResponse
@@ -109,6 +115,8 @@ namespace NRaft
 
 		public void OnRequestVoteResponse(RequestVoteResponse message)
 		{
+			UpdateTerm(message.Term);
+
 			if (message.Term != CurrentTerm)
 				return;
 
@@ -299,6 +307,16 @@ namespace NRaft
 				.TakeWhile(e => e.Index < changes[0].Index)
 				.Concat(changes)
 				.ToArray();
+		}
+
+		private void UpdateTerm(int messageTerm)
+		{
+			if (messageTerm <= CurrentTerm)
+				return;
+
+			CurrentTerm = messageTerm;
+			Role = Types.Follower;
+			_votedFor = null;
 		}
 
 		public void ForceTerm(int term)
