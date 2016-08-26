@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Messages\AppendEntriesResponse.cs" />
     <Compile Include="Messages\AppendEntriesRpc.cs" />
-    <Compile Include="IDispatcher.cs" />
+    <Compile Include="Infrastructure\IDispatcher.cs" />
     <Compile Include="Infrastructure\Quorum.cs" />
     <Compile Include="Infrastructure\LightweightCache.cs" />
     <Compile Include="LogEntry.cs" />

@@ -1,6 +1,6 @@
 using NRaft.Messages;
 
-namespace NRaft
+namespace NRaft.Infrastructure
 {
 	public interface IDispatcher
 	{

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Runtime.InteropServices;
+using NRaft.Infrastructure;
 using NRaft.Messages;
 using NSubstitute;
 using Shouldly;

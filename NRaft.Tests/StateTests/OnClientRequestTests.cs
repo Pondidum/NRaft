@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using NRaft.Infrastructure;
 using NSubstitute;
 using Shouldly;
 using Xunit;
