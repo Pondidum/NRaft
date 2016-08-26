@@ -1,4 +1,4 @@
-namespace NRaft
+namespace NRaft.Messages
 {
 	public class AppendEntriesResponse
 	{

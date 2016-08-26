@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using NRaft.Infrastructure;
+using NRaft.Messages;
 
 namespace NRaft
 {

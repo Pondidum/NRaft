@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using NRaft.Messages;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 

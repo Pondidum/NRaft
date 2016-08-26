@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace NRaft
+namespace NRaft.Messages
 {
 	public class AppendEntriesRpc
 	{

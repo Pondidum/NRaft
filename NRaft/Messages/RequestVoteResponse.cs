@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace NRaft
+﻿namespace NRaft.Messages
 {
 	public class RequestVoteResponse
 	{

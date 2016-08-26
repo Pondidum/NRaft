@@ -1,3 +1,5 @@
+using NRaft.Messages;
+
 namespace NRaft
 {
 	public interface IDispatcher
