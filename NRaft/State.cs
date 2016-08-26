@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 using NRaft.Infrastructure;
 using NRaft.Messages;
+using NRaft.Storage;
 
 namespace NRaft
 {
 	public class State : IDisposable
 	{
+		private readonly IStore _store;
 		private readonly IConnector _connector;
 		private readonly int _nodeID;
 
@@ -34,8 +34,9 @@ namespace NRaft
 		private readonly HashSet<int> _votesGranted;
 
 
-		public State(IConnector connector, int nodeID)
+		public State(IStore store, IConnector connector, int nodeID)
 		{
+			_store = store;
 			_connector = connector;
 			_nodeID = nodeID;
 			_knownNodes = new HashSet<int>();

@@ -51,6 +51,8 @@
     <Compile Include="Messages\RequestVoteRequest.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Infrastructure\Timeout.cs" />
+    <Compile Include="Storage\InMemoryStore.cs" />
+    <Compile Include="Storage\IStore.cs" />
     <Compile Include="Types.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
