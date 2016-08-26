@@ -17,7 +17,6 @@ namespace NRaft
 		private HashSet<HashSet<int>> _quorum;
 
 		//need to be persistent store
-		private int? _votedFor;
 		private LogEntry[] _log;
 
 		//only in memory
@@ -47,7 +46,6 @@ namespace NRaft
 			_votesResponded = new HashSet<int>();
 			_votesGranted = new HashSet<int>();
 
-			_votedFor = null;
 			_log = Enumerable.Empty<LogEntry>().ToArray();
 			Role = Types.Follower;
 
@@ -261,10 +259,10 @@ namespace NRaft
 
 			var grant = message.Term == _store.CurrentTerm
 				&& logOk
-				&& (_votedFor.HasValue == false || _votedFor.Value == message.CandidateID);
+				&& (_store.VotedFor.HasValue == false || _store.VotedFor.Value == message.CandidateID);
 
 			if (grant)
-				_votedFor = message.CandidateID;
+				_store.VotedFor = message.CandidateID;
 
 			return grant;
 		}
@@ -319,7 +317,7 @@ namespace NRaft
 
 			_store.CurrentTerm = messageTerm;
 			Role = Types.Follower;
-			_votedFor = null;
+			_store.VotedFor = null;
 		}
 
 		public void ForceLog(params LogEntry[] log)
@@ -330,11 +328,6 @@ namespace NRaft
 		public void ForceCommitIndex(int index)
 		{
 			CommitIndex = index;
-		}
-
-		public void ForceVotedFor(int candidateID)
-		{
-			_votedFor = candidateID;
 		}
 
 		public void ForceType(Types type)

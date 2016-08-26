@@ -76,7 +76,7 @@ namespace NRaft.Tests.StateTests
 				LastLogTerm = _state.Log.Last().Term
 			};
 
-			_state.ForceVotedFor(15);
+			_store.VotedFor = 15;
 			_state.OnRequestVote(message);
 
 			_connector
