@@ -33,7 +33,7 @@ namespace NRaft
 		//candidate0only state - perhaps subclass or extract
 		private readonly HashSet<int> _votesResponded;
 		private readonly HashSet<int> _votesGranted;
-		
+
 
 		public State(IDispatcher dispatcher, int nodeID)
 		{
@@ -216,6 +216,9 @@ namespace NRaft
 
 		public void AdvanceCommitIndex()
 		{
+			if (Role != Types.Leader)
+				return;
+
 			Func<int, HashSet<int>> agree = index =>
 			{
 				var nodes = _matchIndex
@@ -228,7 +231,7 @@ namespace NRaft
 
 			var agreeIndexes = _log
 				.Select(e => e.Index)
-				.Where(index => _quorum.Any(q => q.SetEquals(agree(index))))
+				.Where(index => KnownNodes.Any() == false || _quorum.Any(q => q.SetEquals(agree(index))))
 				.ToArray();
 
 			if (agreeIndexes.Any() && _log.Single(e => e.Index == agreeIndexes.Max()).Term == CurrentTerm)
