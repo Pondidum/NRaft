@@ -10,14 +10,14 @@ namespace NRaft.Tests.StateTests
 	{
 		private const int CurrentTerm = 3;
 
-		private readonly IDispatcher _dispatcher;
+		private readonly IConnector _connector;
 		private readonly State _state;
 
 		public OnAppendEntriesResponseTests()
 		{
-			_dispatcher = Substitute.For<IDispatcher>();
+			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_dispatcher, Substitute.For<IListener>(), 10);
+			_state = new State(_connector, Substitute.For<IListener>(), 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceType(Types.Leader);
 		}

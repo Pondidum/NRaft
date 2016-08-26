@@ -13,13 +13,13 @@ namespace NRaft.Tests.StateTests
 		private const int CurrentTerm = 5;
 
 		private readonly State _state;
-		private readonly IDispatcher _dispatcher;
+		private readonly IConnector _connector;
 
 		public OnRequestVoteTests()
 		{
-			_dispatcher = Substitute.For<IDispatcher>();
+			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_dispatcher, Substitute.For<IListener>(), 10);
+			_state = new State(_connector, Substitute.For<IListener>(), 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
@@ -57,7 +57,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnRequestVote(message);
 
-			_dispatcher
+			_connector
 				.Received()
 				.SendReply(Arg.Is<RequestVoteResponse>(m => m.VoteGranted == false && m.Term == CurrentTerm));
 		}
@@ -76,7 +76,7 @@ namespace NRaft.Tests.StateTests
 			_state.ForceVotedFor(15);
 			_state.OnRequestVote(message);
 
-			_dispatcher
+			_connector
 				.Received()
 				.SendReply(Arg.Is<RequestVoteResponse>(m => m.VoteGranted == false && m.Term == CurrentTerm));
 		}
@@ -93,7 +93,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnRequestVote(message);
 
-			_dispatcher
+			_connector
 				.Received()
 				.SendReply(Arg.Is<RequestVoteResponse>(m => m.VoteGranted == false && m.Term == CurrentTerm));
 		}
@@ -111,7 +111,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.OnRequestVote(message);
 
-			_dispatcher
+			_connector
 				.Received()
 				.SendReply(Arg.Is<RequestVoteResponse>(m => m.VoteGranted && m.Term == CurrentTerm));
 		}

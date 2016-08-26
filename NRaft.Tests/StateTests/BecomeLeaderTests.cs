@@ -14,17 +14,17 @@ namespace NRaft.Tests.StateTests
 
 		private AppendEntriesRequest _heartbeat;
 
-		private readonly IDispatcher _dispatcher;
+		private readonly IConnector _connector;
 		private readonly State _state;
 
 		public BecomeLeaderTests()
 		{
-			_dispatcher = Substitute.For<IDispatcher>();
-			_dispatcher
+			_connector = Substitute.For<IConnector>();
+			_connector
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _heartbeat = cb.Arg<AppendEntriesRequest>());
 
-			_state = new State(_dispatcher, Substitute.For<IListener>(), NodeID);
+			_state = new State(_connector, Substitute.For<IListener>(), NodeID);
 
 			_state.BecomeCandidate();
 			_state.ForceCommitIndex(3);

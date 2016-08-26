@@ -12,7 +12,7 @@ namespace NRaft.Tests.StateTests
 
 		public OnClientRequestTests()
 		{
-			var dispatcher = Substitute.For<IDispatcher>();
+			var dispatcher = Substitute.For<IConnector>();
 			
 			_state = new State(dispatcher, Substitute.For<IListener>(), 1234);
 		}

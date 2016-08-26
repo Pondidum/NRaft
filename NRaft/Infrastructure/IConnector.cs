@@ -2,7 +2,7 @@ using NRaft.Messages;
 
 namespace NRaft.Infrastructure
 {
-	public interface IDispatcher
+	public interface IConnector
 	{
 		void SendReply(AppendEntriesResponse message);
 		void SendReply(RequestVoteResponse message);

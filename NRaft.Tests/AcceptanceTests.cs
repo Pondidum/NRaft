@@ -9,7 +9,7 @@ namespace NRaft.Tests
 		[Fact]
 		public void When_testing_two_nodes()
 		{
-			var dispatcher = new InMemoryDispatcher();
+			var dispatcher = new InMemoryConnector();
 
 			var first = new State(dispatcher, dispatcher, 1);
 			var second = new State(dispatcher, dispatcher, 2);

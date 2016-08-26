@@ -11,19 +11,19 @@ namespace NRaft.Tests.StateTests
 	{
 		private const int NodeID = 123;
 
-		private readonly IDispatcher _dispatcher;
+		private readonly IConnector _connector;
 		private readonly State _state;
 
 		private RequestVoteRequest _response;
 
 		public BecomeCandidateTests()
 		{
-			_dispatcher = Substitute.For<IDispatcher>();
-			_dispatcher
+			_connector = Substitute.For<IConnector>();
+			_connector
 				.When(d => d.RequestVotes(Arg.Any<RequestVoteRequest>()))
 				.Do(cb => _response = cb.Arg<RequestVoteRequest>());
 
-			_state = new State(_dispatcher, Substitute.For<IListener>(), NodeID);
+			_state = new State(_connector, Substitute.For<IListener>(), NodeID);
 
 			_state.ForceTerm(2);
 			_state.ForceLog(
@@ -50,7 +50,7 @@ namespace NRaft.Tests.StateTests
 		public void The_node_votes_for_itself() => _state.VotesGranted.ShouldBe(new[] { NodeID });
 
 		[Fact]
-		public void The_node_requests_votes_from_others() => _dispatcher.Received(1).RequestVotes(Arg.Any<RequestVoteRequest>());
+		public void The_node_requests_votes_from_others() => _connector.Received(1).RequestVotes(Arg.Any<RequestVoteRequest>());
 
 		[Fact]
 		public void The_request_to_others_is_well_formed() => _response.ShouldSatisfyAllConditions(

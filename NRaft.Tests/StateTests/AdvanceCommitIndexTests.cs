@@ -11,14 +11,14 @@ namespace NRaft.Tests.StateTests
 	{
 		private const int NodeID = 11;
 
-		private readonly IDispatcher _dispatcher;
+		private readonly IConnector _connector;
 		private readonly State _state;
 
 		public AdvanceCommitIndexTests()
 		{
-			_dispatcher = Substitute.For<IDispatcher>();
+			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_dispatcher, Substitute.For<IListener>(), NodeID);
+			_state = new State(_connector, Substitute.For<IListener>(), NodeID);
 			_state.BecomeCandidate();
 			_state.ForceType(Types.Leader);
 			_state.ForceCommitIndex(2);

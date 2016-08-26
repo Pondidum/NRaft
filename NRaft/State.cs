@@ -10,7 +10,7 @@ namespace NRaft
 {
 	public class State : IDisposable
 	{
-		private readonly IDispatcher _dispatcher;
+		private readonly IConnector _connector;
 		private readonly IListener _listener;
 		private readonly int _nodeID;
 
@@ -35,9 +35,9 @@ namespace NRaft
 		private readonly HashSet<int> _votesGranted;
 
 
-		public State(IDispatcher dispatcher, IListener listener, int nodeID)
+		public State(IConnector connector, IListener listener, int nodeID)
 		{
-			_dispatcher = dispatcher;
+			_connector = connector;
 			_listener = listener;
 			_nodeID = nodeID;
 			_knownNodes = new HashSet<int>();
@@ -76,7 +76,7 @@ namespace NRaft
 
 			var success = AppendEntries(message);
 
-			_dispatcher.SendReply(new AppendEntriesResponse
+			_connector.SendReply(new AppendEntriesResponse
 			{
 				LeaderID = message.LeaderID,
 				FollowerID = _nodeID,
@@ -110,7 +110,7 @@ namespace NRaft
 
 			var voteGranted = RequestVote(message);
 
-			_dispatcher.SendReply(new RequestVoteResponse
+			_connector.SendReply(new RequestVoteResponse
 			{
 				CandidateID = message.CandidateID,
 				GranterID = _nodeID,
@@ -150,7 +150,7 @@ namespace NRaft
 				VoteGranted = true
 			});
 
-			_dispatcher.RequestVotes(new RequestVoteRequest
+			_connector.RequestVotes(new RequestVoteRequest
 			{
 				CandidateID = _nodeID,
 				Term = CurrentTerm,
@@ -195,7 +195,7 @@ namespace NRaft
 					.TakeWhile(e => e.Index <= lastEntry)
 					.ToArray();
 
-				_dispatcher.SendHeartbeat(new AppendEntriesRequest
+				_connector.SendHeartbeat(new AppendEntriesRequest
 				{
 					LeaderID = _nodeID,
 					RecipientID = nodeID,

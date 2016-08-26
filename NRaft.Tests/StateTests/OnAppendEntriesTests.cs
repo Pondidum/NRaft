@@ -15,16 +15,16 @@ namespace NRaft.Tests.StateTests
 		private AppendEntriesResponse _response;
 
 		private readonly State _state;
-		private readonly IDispatcher _dispatcher;
+		private readonly IConnector _connector;
 
 		public OnAppendEntriesTests()
 		{
-			_dispatcher = Substitute.For<IDispatcher>();
-			_dispatcher
+			_connector = Substitute.For<IConnector>();
+			_connector
 				.When(d => d.SendReply(Arg.Any<AppendEntriesResponse>()))
 				.Do(cb => _response = cb.Arg<AppendEntriesResponse>());
 
-			_state = new State(_dispatcher, Substitute.For<IListener>(), 10);
+			_state = new State(_connector, Substitute.For<IListener>(), 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },

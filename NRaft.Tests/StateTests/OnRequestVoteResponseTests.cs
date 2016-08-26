@@ -14,7 +14,7 @@ namespace NRaft.Tests.StateTests
 
 		public OnRequestVoteResponseTests()
 		{
-			var dispatcher = Substitute.For<IDispatcher>();
+			var dispatcher = Substitute.For<IConnector>();
 
 			_state = new State(dispatcher, Substitute.For<IListener>(), 10);
 			_state.ForceTerm(CurrentTerm);
