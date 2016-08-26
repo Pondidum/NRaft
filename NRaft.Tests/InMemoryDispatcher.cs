@@ -6,7 +6,7 @@ using NRaft.Messages;
 
 namespace NRaft.Tests
 {
-	public class InMemoryDispatcher : IDispatcher
+	public class InMemoryDispatcher : IDispatcher, IListener
 	{
 		private readonly LightweightCache<int, List<Action<AppendEntriesRequest>>> _appendEntriesRpcHandlers;
 		private readonly LightweightCache<int, List<Action<AppendEntriesResponse>>> _appendEntriesResponseHandlers;

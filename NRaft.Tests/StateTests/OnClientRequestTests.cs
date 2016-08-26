@@ -14,7 +14,7 @@ namespace NRaft.Tests.StateTests
 		{
 			var dispatcher = Substitute.For<IDispatcher>();
 			
-			_state = new State(dispatcher, 1234);
+			_state = new State(dispatcher, Substitute.For<IListener>(), 1234);
 		}
 
 		[Fact]

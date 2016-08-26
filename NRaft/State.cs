@@ -8,9 +8,10 @@ using NRaft.Messages;
 
 namespace NRaft
 {
-	public class State
+	public class State : IDisposable
 	{
 		private readonly IDispatcher _dispatcher;
+		private readonly IListener _listener;
 		private readonly int _nodeID;
 
 		private readonly HashSet<int> _knownNodes;
@@ -34,9 +35,10 @@ namespace NRaft
 		private readonly HashSet<int> _votesGranted;
 
 
-		public State(IDispatcher dispatcher, int nodeID)
+		public State(IDispatcher dispatcher, IListener listener, int nodeID)
 		{
 			_dispatcher = dispatcher;
+			_listener = listener;
 			_nodeID = nodeID;
 			_knownNodes = new HashSet<int>();
 			_quorum = new HashSet<HashSet<int>>();
@@ -53,6 +55,11 @@ namespace NRaft
 			Role = Types.Follower;
 
 			CommitIndex = 0;
+
+			_listener.Register(_nodeID, OnAppendEntries);
+			_listener.Register(_nodeID, OnAppendEntriesResponse);
+			_listener.Register(_nodeID, OnRequestVote);
+			_listener.Register(_nodeID, OnRequestVoteResponse);
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;
@@ -341,6 +348,11 @@ namespace NRaft
 		public void ForceType(Types type)
 		{
 			Role = type;
+		}
+
+		public void Dispose()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

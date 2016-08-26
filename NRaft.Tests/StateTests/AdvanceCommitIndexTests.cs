@@ -18,7 +18,7 @@ namespace NRaft.Tests.StateTests
 		{
 			_dispatcher = Substitute.For<IDispatcher>();
 
-			_state = new State(_dispatcher, NodeID);
+			_state = new State(_dispatcher, Substitute.For<IListener>(), NodeID);
 			_state.BecomeCandidate();
 			_state.ForceType(Types.Leader);
 			_state.ForceCommitIndex(2);

@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\IListener.cs" />
     <Compile Include="Messages\AppendEntriesResponse.cs" />
     <Compile Include="Messages\AppendEntriesRequest.cs" />
     <Compile Include="Infrastructure\IDispatcher.cs" />
