@@ -73,6 +73,7 @@ namespace NRaft
 
 			_dispatcher.SendReply(new AppendEntriesResponse
 			{
+				LeaderID = message.LeaderID,
 				FollowerID = _nodeID,
 				Success = success,
 				Term = CurrentTerm,
