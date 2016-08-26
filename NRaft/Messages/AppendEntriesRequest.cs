@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace NRaft.Messages
 {
-	public class AppendEntriesRpc
+	public class AppendEntriesRequest
 	{
 		public int Term { get; set; }
 		public int LeaderID { get; set; }
@@ -15,7 +15,7 @@ namespace NRaft.Messages
 
 		public int RecipientID { get; set; }
 
-		public AppendEntriesRpc()
+		public AppendEntriesRequest()
 		{
 			Entries = Enumerable.Empty<LogEntry>().ToArray();
 		}

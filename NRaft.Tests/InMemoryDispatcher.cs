@@ -8,7 +8,7 @@ namespace NRaft.Tests
 {
 	public class InMemoryDispatcher : IDispatcher
 	{
-		private readonly LightweightCache<int, List<Action<AppendEntriesRpc>>> _appendEntriesRpcHandlers;
+		private readonly LightweightCache<int, List<Action<AppendEntriesRequest>>> _appendEntriesRpcHandlers;
 		private readonly LightweightCache<int, List<Action<AppendEntriesResponse>>> _appendEntriesResponseHandlers;
 
 		private readonly LightweightCache<int, List<Action<RequestVoteRequest>>> _requestVotesHandlers;
@@ -17,8 +17,8 @@ namespace NRaft.Tests
 
 		public InMemoryDispatcher()
 		{
-			_appendEntriesRpcHandlers = new LightweightCache<int, List<Action<AppendEntriesRpc>>>(
-				key => new List<Action<AppendEntriesRpc>>()
+			_appendEntriesRpcHandlers = new LightweightCache<int, List<Action<AppendEntriesRequest>>>(
+				key => new List<Action<AppendEntriesRequest>>()
 			);
 
 			_appendEntriesResponseHandlers = new LightweightCache<int, List<Action<AppendEntriesResponse>>>(
@@ -42,7 +42,7 @@ namespace NRaft.Tests
 				.SelectMany(pair => pair.Value);
 		}
 
-		public void Register(int nodeID, Action<AppendEntriesRpc> handler)
+		public void Register(int nodeID, Action<AppendEntriesRequest> handler)
 		{
 			_appendEntriesRpcHandlers[nodeID].Add(handler);
 		}
@@ -79,7 +79,7 @@ namespace NRaft.Tests
 				.ForEach(handler => handler(message));
 		}
 
-		public void SendHeartbeat(AppendEntriesRpc message)
+		public void SendHeartbeat(AppendEntriesRequest message)
 		{
 			Others(_appendEntriesRpcHandlers, message.LeaderID)
 				.ToList()

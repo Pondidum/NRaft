@@ -8,6 +8,6 @@ namespace NRaft.Infrastructure
 		void SendReply(RequestVoteResponse message);
 
 		void RequestVotes(RequestVoteRequest message);
-		void SendHeartbeat(AppendEntriesRpc message);
+		void SendHeartbeat(AppendEntriesRequest message);
 	}
 }

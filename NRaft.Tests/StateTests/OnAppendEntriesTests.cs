@@ -42,7 +42,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_a_message_has_a_newer_term()
 		{
-			_state.OnAppendEntries(new AppendEntriesRpc
+			_state.OnAppendEntries(new AppendEntriesRequest
 			{
 				Term = CurrentTerm + 1,
 			});
@@ -53,7 +53,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_a_messages_term_is_less_than_the_nodes()
 		{
-			var message = new AppendEntriesRpc
+			var message = new AppendEntriesRequest
 			{
 				Term = 3
 			};
@@ -70,7 +70,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_log_does_not_contain_entry_at_previousLogIndex_with_matching_term()
 		{
-			var message = new AppendEntriesRpc
+			var message = new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = 2,
@@ -90,7 +90,7 @@ namespace NRaft.Tests.StateTests
 		{
 			var lastCommonEntry = _state.Log.Single(e => e.Index == 4);
 
-			var message = new AppendEntriesRpc
+			var message = new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = lastCommonEntry.Index,
@@ -124,7 +124,7 @@ namespace NRaft.Tests.StateTests
 		{
 			var lastCommonEntry = _state.Log.Last();
 
-			var message = new AppendEntriesRpc
+			var message = new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = lastCommonEntry.Index,
@@ -148,7 +148,7 @@ namespace NRaft.Tests.StateTests
 		{
 			var lastCommonEntry = _state.Log.Last();
 
-			var message = new AppendEntriesRpc
+			var message = new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = lastCommonEntry.Index,
@@ -177,7 +177,7 @@ namespace NRaft.Tests.StateTests
 		{
 			var lastCommonEntry = _state.Log.Last();
 
-			var message = new AppendEntriesRpc
+			var message = new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = lastCommonEntry.Index,
@@ -204,7 +204,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_node_is_a_candidate_and_the_terms_are_equal()
 		{
-			var message = new AppendEntriesRpc
+			var message = new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = _state.Log.Last().Index,

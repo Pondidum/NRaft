@@ -12,7 +12,7 @@ namespace NRaft.Tests.StateTests
 	{
 		private const int NodeID = 10;
 
-		private AppendEntriesRpc _heartbeat;
+		private AppendEntriesRequest _heartbeat;
 
 		private readonly IDispatcher _dispatcher;
 		private readonly State _state;
@@ -21,8 +21,8 @@ namespace NRaft.Tests.StateTests
 		{
 			_dispatcher = Substitute.For<IDispatcher>();
 			_dispatcher
-				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRpc>()))
-				.Do(cb => _heartbeat = cb.Arg<AppendEntriesRpc>());
+				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
+				.Do(cb => _heartbeat = cb.Arg<AppendEntriesRequest>());
 
 			_state = new State(_dispatcher, NodeID);
 

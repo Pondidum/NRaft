@@ -65,7 +65,7 @@ namespace NRaft
 		public int NextIndexFor(int nodeID) => _nextIndex[nodeID];
 		public int MatchIndexFor(int nodeID) => _matchIndex[nodeID];
 
-		public void OnAppendEntries(AppendEntriesRpc message)
+		public void OnAppendEntries(AppendEntriesRequest message)
 		{
 			UpdateTerm(message.Term);
 
@@ -190,7 +190,7 @@ namespace NRaft
 					.TakeWhile(e => e.Index <= lastEntry)
 					.ToArray();
 
-				_dispatcher.SendHeartbeat(new AppendEntriesRpc
+				_dispatcher.SendHeartbeat(new AppendEntriesRequest
 				{
 					LeaderID = _nodeID,
 					RecipientID = nodeID,
@@ -268,7 +268,7 @@ namespace NRaft
 		}
 
 
-		private bool AppendEntries(AppendEntriesRpc message)
+		private bool AppendEntries(AppendEntriesRequest message)
 		{
 			if (message.Term > CurrentTerm)
 				return false;

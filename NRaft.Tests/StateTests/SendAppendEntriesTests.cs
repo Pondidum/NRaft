@@ -14,16 +14,16 @@ namespace NRaft.Tests.StateTests
 
 		private readonly IDispatcher _dispatcher;
 		private readonly State _state;
-		private readonly List<AppendEntriesRpc> _messages;
+		private readonly List<AppendEntriesRequest> _messages;
 
 		public SendAppendEntriesTests()
 		{
-			_messages = new List<AppendEntriesRpc>();
+			_messages = new List<AppendEntriesRequest>();
 
 			_dispatcher = Substitute.For<IDispatcher>();
 			_dispatcher
-				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRpc>()))
-				.Do(cb => _messages.Add(cb.Arg<AppendEntriesRpc>()));
+				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
+				.Do(cb => _messages.Add(cb.Arg<AppendEntriesRequest>()));
 
 			_state = new State(_dispatcher, NodeID);
 		}
@@ -38,7 +38,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.SendAppendEntries();
 
-			_dispatcher.DidNotReceive().SendHeartbeat(Arg.Any<AppendEntriesRpc>());
+			_dispatcher.DidNotReceive().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 		}
 
 		[Fact]
@@ -48,7 +48,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.SendAppendEntries();
 
-			_dispatcher.Received().SendHeartbeat(Arg.Any<AppendEntriesRpc>());
+			_dispatcher.Received().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 
 			var message = _messages.Single();
 
@@ -74,7 +74,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.SendAppendEntries();
 
-			_dispatcher.Received().SendHeartbeat(Arg.Any<AppendEntriesRpc>());
+			_dispatcher.Received().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 
 			var message = _messages.Single();
 
@@ -108,7 +108,7 @@ namespace NRaft.Tests.StateTests
 
 			_state.SendAppendEntries();
 
-			_dispatcher.Received(2).SendHeartbeat(Arg.Any<AppendEntriesRpc>());
+			_dispatcher.Received(2).SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 		}
 	}
 }
