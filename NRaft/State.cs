@@ -11,7 +11,6 @@ namespace NRaft
 	public class State : IDisposable
 	{
 		private readonly IConnector _connector;
-		private readonly IListener _listener;
 		private readonly int _nodeID;
 
 		private readonly HashSet<int> _knownNodes;
@@ -35,10 +34,9 @@ namespace NRaft
 		private readonly HashSet<int> _votesGranted;
 
 
-		public State(IConnector connector, IListener listener, int nodeID)
+		public State(IConnector connector, int nodeID)
 		{
 			_connector = connector;
-			_listener = listener;
 			_nodeID = nodeID;
 			_knownNodes = new HashSet<int>();
 			_quorum = new HashSet<HashSet<int>>();
@@ -56,10 +54,10 @@ namespace NRaft
 
 			CommitIndex = 0;
 
-			_listener.Register(_nodeID, OnAppendEntries);
-			_listener.Register(_nodeID, OnAppendEntriesResponse);
-			_listener.Register(_nodeID, OnRequestVote);
-			_listener.Register(_nodeID, OnRequestVoteResponse);
+			_connector.Register(_nodeID, OnAppendEntries);
+			_connector.Register(_nodeID, OnAppendEntriesResponse);
+			_connector.Register(_nodeID, OnRequestVote);
+			_connector.Register(_nodeID, OnRequestVoteResponse);
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;

@@ -25,7 +25,7 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _messages.Add(cb.Arg<AppendEntriesRequest>()));
 
-			_state = new State(_connector, Substitute.For<IListener>(), NodeID);
+			_state = new State(_connector, NodeID);
 		}
 
 		[Fact]

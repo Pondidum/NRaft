@@ -23,7 +23,7 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.RequestVotes(Arg.Any<RequestVoteRequest>()))
 				.Do(cb => _response = cb.Arg<RequestVoteRequest>());
 
-			_state = new State(_connector, Substitute.For<IListener>(), NodeID);
+			_state = new State(_connector, NodeID);
 
 			_state.ForceTerm(2);
 			_state.ForceLog(

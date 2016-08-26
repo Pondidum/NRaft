@@ -19,7 +19,7 @@ namespace NRaft.Tests.StateTests
 		{
 			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_connector, Substitute.For<IListener>(), 10);
+			_state = new State(_connector, 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },

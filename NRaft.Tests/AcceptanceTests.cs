@@ -11,8 +11,8 @@ namespace NRaft.Tests
 		{
 			var dispatcher = new InMemoryConnector();
 
-			var first = new State(dispatcher, dispatcher, 1);
-			var second = new State(dispatcher, dispatcher, 2);
+			var first = new State(dispatcher, 1);
+			var second = new State(dispatcher, 2);
 
 			first.AddNodeToCluster(2);
 			second.AddNodeToCluster(1);

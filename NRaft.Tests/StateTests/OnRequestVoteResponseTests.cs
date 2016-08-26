@@ -16,7 +16,7 @@ namespace NRaft.Tests.StateTests
 		{
 			var dispatcher = Substitute.For<IConnector>();
 
-			_state = new State(dispatcher, Substitute.For<IListener>(), 10);
+			_state = new State(dispatcher, 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceType(Types.Candidate);
 		}

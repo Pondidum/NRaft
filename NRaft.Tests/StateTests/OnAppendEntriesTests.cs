@@ -24,7 +24,7 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.SendReply(Arg.Any<AppendEntriesResponse>()))
 				.Do(cb => _response = cb.Arg<AppendEntriesResponse>());
 
-			_state = new State(_connector, Substitute.For<IListener>(), 10);
+			_state = new State(_connector, 10);
 			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },

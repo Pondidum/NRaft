@@ -18,7 +18,7 @@ namespace NRaft.Tests.StateTests
 		{
 			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_connector, Substitute.For<IListener>(), NodeID);
+			_state = new State(_connector, NodeID);
 			_state.BecomeCandidate();
 			_state.ForceType(Types.Leader);
 			_state.ForceCommitIndex(2);
