@@ -18,10 +18,11 @@ namespace NRaft.Tests.StateTests
 		public OnAppendEntriesResponseTests()
 		{
 			_store = new InMemoryStore();
+			_store.CurrentTerm = CurrentTerm;
+
 			_connector = Substitute.For<IConnector>();
 
 			_state = new State(_store, _connector, 10);
-			_state.ForceTerm(CurrentTerm);
 			_state.ForceType(Types.Leader);
 		}
 

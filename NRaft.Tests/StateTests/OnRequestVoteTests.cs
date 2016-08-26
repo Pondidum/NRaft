@@ -10,7 +10,6 @@ namespace NRaft.Tests.StateTests
 {
 	public class OnRequestVoteTests
 	{
-
 		private const int CurrentTerm = 5;
 
 		private readonly State _state;
@@ -20,10 +19,11 @@ namespace NRaft.Tests.StateTests
 		public OnRequestVoteTests()
 		{
 			_store = new InMemoryStore();
+			_store.CurrentTerm = CurrentTerm;
+
 			_connector = Substitute.For<IConnector>();
 
 			_state = new State(_store, _connector, 10);
-			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },

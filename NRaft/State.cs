@@ -322,11 +322,6 @@ namespace NRaft
 			_votedFor = null;
 		}
 
-		public void ForceTerm(int term)
-		{
-			_store.CurrentTerm = term;
-		}
-
 		public void ForceLog(params LogEntry[] log)
 		{
 			_log = log;

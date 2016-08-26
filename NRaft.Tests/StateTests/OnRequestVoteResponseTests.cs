@@ -17,10 +17,11 @@ namespace NRaft.Tests.StateTests
 		public OnRequestVoteResponseTests()
 		{
 			_store = new InMemoryStore();
+			_store.CurrentTerm = CurrentTerm;
+
 			var dispatcher = Substitute.For<IConnector>();
 
 			_state = new State(_store, dispatcher, 10);
-			_state.ForceTerm(CurrentTerm);
 			_state.ForceType(Types.Candidate);
 		}
 

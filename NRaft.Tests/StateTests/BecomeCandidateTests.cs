@@ -21,6 +21,7 @@ namespace NRaft.Tests.StateTests
 		public BecomeCandidateTests()
 		{
 			_store = new InMemoryStore();
+			_store.CurrentTerm = 2;
 
 			_connector = Substitute.For<IConnector>();
 			_connector
@@ -29,7 +30,6 @@ namespace NRaft.Tests.StateTests
 
 			_state = new State(_store, _connector, NodeID);
 
-			_state.ForceTerm(2);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 0 },

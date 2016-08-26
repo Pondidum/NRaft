@@ -22,13 +22,14 @@ namespace NRaft.Tests.StateTests
 		public OnAppendEntriesTests()
 		{
 			_store = new InMemoryStore();
+			_store.CurrentTerm = CurrentTerm;
+
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.SendReply(Arg.Any<AppendEntriesResponse>()))
 				.Do(cb => _response = cb.Arg<AppendEntriesResponse>());
 
 			_state = new State(_store, _connector, 10);
-			_state.ForceTerm(CurrentTerm);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },

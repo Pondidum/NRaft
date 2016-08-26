@@ -22,6 +22,8 @@ namespace NRaft.Tests.StateTests
 		public BecomeLeaderTests()
 		{
 			_store = new InMemoryStore();
+			_store.CurrentTerm = 2;
+
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
@@ -31,7 +33,6 @@ namespace NRaft.Tests.StateTests
 
 			_state.BecomeCandidate();
 			_state.ForceCommitIndex(3);
-			_state.ForceTerm(2);
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 0 },
