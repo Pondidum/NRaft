@@ -11,7 +11,7 @@ namespace NRaft.Tests
 		private readonly LightweightCache<int, List<Action<AppendEntriesRpc>>> _appendEntriesRpcHandlers;
 		private readonly LightweightCache<int, List<Action<AppendEntriesResponse>>> _appendEntriesResponseHandlers;
 
-		private readonly LightweightCache<int, List<Action<RequestVoteRpc>>> _requestVotesHandlers;
+		private readonly LightweightCache<int, List<Action<RequestVoteRequest>>> _requestVotesHandlers;
 		private readonly LightweightCache<int, List<Action<RequestVoteResponse>>> _requestVoteResponseHandlers;
 		
 
@@ -25,8 +25,8 @@ namespace NRaft.Tests
 				key => new List<Action<AppendEntriesResponse>>()
 			);
 
-			_requestVotesHandlers = new LightweightCache<int, List<Action<RequestVoteRpc>>>(
-				key => new List<Action<RequestVoteRpc>>()
+			_requestVotesHandlers = new LightweightCache<int, List<Action<RequestVoteRequest>>>(
+				key => new List<Action<RequestVoteRequest>>()
 			);
 
 			_requestVoteResponseHandlers = new LightweightCache<int, List<Action<RequestVoteResponse>>>(
@@ -52,7 +52,7 @@ namespace NRaft.Tests
 			_appendEntriesResponseHandlers[nodeID].Add(handler);
 		}
 
-		public void Register(int nodeID, Action<RequestVoteRpc> handler)
+		public void Register(int nodeID, Action<RequestVoteRequest> handler)
 		{
 			_requestVotesHandlers[nodeID].Add(handler);
 		}
@@ -72,7 +72,7 @@ namespace NRaft.Tests
 			_requestVoteResponseHandlers[message.CandidateID].ForEach(handler => handler(message));
 		}
 
-		public void RequestVotes(RequestVoteRpc message)
+		public void RequestVotes(RequestVoteRequest message)
 		{
 			Others(_requestVotesHandlers, message.CandidateID)
 				.ToList()

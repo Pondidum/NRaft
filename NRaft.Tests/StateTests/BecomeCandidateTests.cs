@@ -14,14 +14,14 @@ namespace NRaft.Tests.StateTests
 		private readonly IDispatcher _dispatcher;
 		private readonly State _state;
 
-		private RequestVoteRpc _response;
+		private RequestVoteRequest _response;
 
 		public BecomeCandidateTests()
 		{
 			_dispatcher = Substitute.For<IDispatcher>();
 			_dispatcher
-				.When(d => d.RequestVotes(Arg.Any<RequestVoteRpc>()))
-				.Do(cb => _response = cb.Arg<RequestVoteRpc>());
+				.When(d => d.RequestVotes(Arg.Any<RequestVoteRequest>()))
+				.Do(cb => _response = cb.Arg<RequestVoteRequest>());
 
 			_state = new State(_dispatcher, NodeID);
 
@@ -50,7 +50,7 @@ namespace NRaft.Tests.StateTests
 		public void The_node_votes_for_itself() => _state.VotesGranted.ShouldBe(new[] { NodeID });
 
 		[Fact]
-		public void The_node_requests_votes_from_others() => _dispatcher.Received(1).RequestVotes(Arg.Any<RequestVoteRpc>());
+		public void The_node_requests_votes_from_others() => _dispatcher.Received(1).RequestVotes(Arg.Any<RequestVoteRequest>());
 
 		[Fact]
 		public void The_request_to_others_is_well_formed() => _response.ShouldSatisfyAllConditions(

@@ -7,7 +7,7 @@ namespace NRaft.Infrastructure
 		void SendReply(AppendEntriesResponse message);
 		void SendReply(RequestVoteResponse message);
 
-		void RequestVotes(RequestVoteRpc message);
+		void RequestVotes(RequestVoteRequest message);
 		void SendHeartbeat(AppendEntriesRpc message);
 	}
 }

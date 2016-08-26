@@ -99,7 +99,7 @@ namespace NRaft
 			}
 		}
 
-		public void OnRequestVote(RequestVoteRpc message)
+		public void OnRequestVote(RequestVoteRequest message)
 		{
 			UpdateTerm(message.Term);
 
@@ -145,7 +145,7 @@ namespace NRaft
 				VoteGranted = true
 			});
 
-			_dispatcher.RequestVotes(new RequestVoteRpc
+			_dispatcher.RequestVotes(new RequestVoteRequest
 			{
 				CandidateID = _nodeID,
 				Term = CurrentTerm,
@@ -252,7 +252,7 @@ namespace NRaft
 		private int LastTerm() => _log.Length == 0 ? 0 : _log.Last().Term;
 		private int LastIndex() => _log.Length == 0 ? 0 : _log.Last().Index;
 
-		private bool RequestVote(RequestVoteRpc message)
+		private bool RequestVote(RequestVoteRequest message)
 		{
 			var logOk = message.LastLogTerm > LastTerm()
 				|| (message.LastLogTerm == LastTerm() && message.LastLogIndex >= LastIndex());

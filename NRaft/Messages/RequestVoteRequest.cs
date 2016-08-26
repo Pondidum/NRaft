@@ -1,6 +1,6 @@
 ﻿namespace NRaft.Messages
 {
-	public class RequestVoteRpc
+	public class RequestVoteRequest
 	{
 		public int Term { get; set; }
 		public int CandidateID { get; set; }

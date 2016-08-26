@@ -36,7 +36,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_a_message_has_a_newer_term()
 		{
-			_state.OnRequestVote(new RequestVoteRpc
+			_state.OnRequestVote(new RequestVoteRequest
 			{
 				Term = CurrentTerm + 1,
 			});
@@ -47,7 +47,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_requested_term_is_less_than_the_nodes()
 		{
-			var message = new RequestVoteRpc
+			var message = new RequestVoteRequest
 			{
 				Term = CurrentTerm - 2,
 				CandidateID = 20,
@@ -65,7 +65,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_requested_term_is_equal_and_a_vote_has_already_cast_for_another_candidate()
 		{
-			var message = new RequestVoteRpc
+			var message = new RequestVoteRequest
 			{
 				Term = CurrentTerm,
 				CandidateID = 20,
@@ -84,7 +84,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_requested_term_is_equal_and_the_candidates_log_is_not_up_to_date()
 		{
-			var message = new RequestVoteRpc
+			var message = new RequestVoteRequest
 			{
 				Term = CurrentTerm,
 				CandidateID = 20,
@@ -101,7 +101,7 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_the_term_is_equal_and_the_log_is_up_to_date()
 		{
-			var message = new RequestVoteRpc
+			var message = new RequestVoteRequest
 			{
 				Term = CurrentTerm,
 				CandidateID = 20,
