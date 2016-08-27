@@ -30,6 +30,14 @@ namespace NRaft.Tests.StateTests
 
 			_state = new State(_store, _connector, NodeID);
 
+			_state.OnRequestVoteResponse(new RequestVoteResponse
+			{
+				CandidateID = NodeID,
+				GranterID = 456,
+				Term = _store.CurrentTerm,
+				VoteGranted = true
+			});
+
 			_state.ForceLog(
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 0 },
@@ -46,6 +54,9 @@ namespace NRaft.Tests.StateTests
 
 		[Fact]
 		public void The_term_increases() => _store.CurrentTerm.ShouldBe(3);
+
+		[Fact]
+		public void The_vote_responses_are_cleared() => _state.VotesResponded.ShouldBeEmpty();
 
 		[Fact]
 		public void The_node_responds_to_itself() => _state.VotesResponded.ShouldBe(new[] { NodeID });
