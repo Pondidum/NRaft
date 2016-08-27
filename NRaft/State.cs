@@ -131,7 +131,12 @@ namespace NRaft
 		public void BecomeCandidate()
 		{
 			Role = Types.Candidate;
+
 			_store.CurrentTerm++;
+			_store.VotedFor = null;
+
+			_votesResponded.Clear();
+			_votesGranted.Clear();
 
 			OnRequestVoteResponse(new RequestVoteResponse
 			{
