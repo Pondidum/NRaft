@@ -10,6 +10,12 @@ namespace NRaft.Infrastructure
 		void Register(int nodeID, Action<RequestVoteRequest> handler);
 		void Register(int nodeID, Action<RequestVoteResponse> handler);
 
+
+		void Deregister(int nodeID, Action<AppendEntriesRequest> handler);
+		void Deregister(int nodeID, Action<AppendEntriesResponse> handler);
+		void Deregister(int nodeID, Action<RequestVoteRequest> handler);
+		void Deregister(int nodeID, Action<RequestVoteResponse> handler);
+
 		void SendReply(AppendEntriesResponse message);
 		void SendReply(RequestVoteResponse message);
 

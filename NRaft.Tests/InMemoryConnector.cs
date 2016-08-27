@@ -13,7 +13,7 @@ namespace NRaft.Tests
 
 		private readonly LightweightCache<int, List<Action<RequestVoteRequest>>> _requestVotesHandlers;
 		private readonly LightweightCache<int, List<Action<RequestVoteResponse>>> _requestVoteResponseHandlers;
-		
+
 
 		public InMemoryConnector()
 		{
@@ -60,6 +60,26 @@ namespace NRaft.Tests
 		public void Register(int nodeID, Action<RequestVoteResponse> handler)
 		{
 			_requestVoteResponseHandlers[nodeID].Add(handler);
+		}
+
+		public void Deregister(int nodeID, Action<AppendEntriesRequest> handler)
+		{
+			_appendEntriesRpcHandlers[nodeID].Remove(handler);
+		}
+
+		public void Deregister(int nodeID, Action<AppendEntriesResponse> handler)
+		{
+			_appendEntriesResponseHandlers[nodeID].Remove(handler);
+		}
+
+		public void Deregister(int nodeID, Action<RequestVoteRequest> handler)
+		{
+			_requestVotesHandlers[nodeID].Remove(handler);
+		}
+
+		public void Deregister(int nodeID, Action<RequestVoteResponse> handler)
+		{
+			_requestVoteResponseHandlers[nodeID].Remove(handler);
 		}
 
 		public void SendReply(AppendEntriesResponse message)

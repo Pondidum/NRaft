@@ -332,7 +332,10 @@ namespace NRaft
 
 		public void Dispose()
 		{
-			throw new NotImplementedException();
+			_connector.Deregister(_nodeID, OnAppendEntries);
+			_connector.Deregister(_nodeID, OnAppendEntriesResponse);
+			_connector.Deregister(_nodeID, OnRequestVote);
+			_connector.Deregister(_nodeID, OnRequestVoteResponse);
 		}
 	}
 }

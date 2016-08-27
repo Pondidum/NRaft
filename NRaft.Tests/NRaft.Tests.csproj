@@ -78,6 +78,7 @@
     <Compile Include="StateTests\OnRequestVoteResponseTests.cs" />
     <Compile Include="StateTests\OnRequestVoteTests.cs" />
     <Compile Include="StateTests\SendAppendEntriesTests.cs" />
+    <Compile Include="StateTests\StateTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
