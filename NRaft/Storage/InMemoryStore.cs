@@ -13,9 +13,9 @@ namespace NRaft.Storage
 			Log = new LogEntry[0];
 		}
 
-		public void Write(Action<IStoreWriter> write)
+		public void Write(Action<IStoreWriter> apply)
 		{
-			write(this);
+			apply(this);
 		}
 	}
 }

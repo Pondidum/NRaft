@@ -8,7 +8,7 @@ namespace NRaft.Storage
 		int? VotedFor { get; }
 		LogEntry[] Log { get; }
 
-		void Write(Action<IStoreWriter> write);
+		void Write(Action<IStoreWriter> apply);
 	}
 
 	public interface IStoreWriter
