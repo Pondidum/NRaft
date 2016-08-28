@@ -24,7 +24,7 @@ namespace NRaft.Tests.StateTests
 			_connector = Substitute.For<IConnector>();
 
 			_state = new State(_store, _connector, 10);
-			_state.ForceLog(
+			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },
 				new LogEntry { Index = 3, Term = 2 },
@@ -32,7 +32,7 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 5, Term = 3 },
 				new LogEntry { Index = 6, Term = 4 },
 				new LogEntry { Index = 7, Term = 5 }
-			);
+			};
 			_state.ForceCommitIndex(7);
 		}
 

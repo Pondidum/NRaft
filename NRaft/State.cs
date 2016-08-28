@@ -319,11 +319,7 @@ namespace NRaft
 			_store.CurrentTerm = messageTerm;
 			Role = Types.Follower;
 			_store.VotedFor = null;
-		}
 
-		public void ForceLog(params LogEntry[] log)
-		{
-			_store.Log = log;
 		}
 
 		public void ForceCommitIndex(int index)

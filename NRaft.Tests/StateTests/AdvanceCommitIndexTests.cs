@@ -25,11 +25,11 @@ namespace NRaft.Tests.StateTests
 			_state.BecomeCandidate();
 			_state.ForceType(Types.Leader);
 			_state.ForceCommitIndex(2);
-			_state.ForceLog(
+			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 0 },
 				new LogEntry { Index = 3, Term = 1 }
-			);
+			};
 		}
 
 		[Fact]

@@ -33,13 +33,13 @@ namespace NRaft.Tests.StateTests
 
 			_state.BecomeCandidate();
 			_state.ForceCommitIndex(3);
-			_state.ForceLog(
+			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 0 },
 				new LogEntry { Index = 3, Term = 1 },
 				new LogEntry { Index = 4, Term = 2 },
 				new LogEntry { Index = 5, Term = 2 }
-			);
+			};
 
 			_state.AddNodeToCluster(15);
 			_state.OnRequestVoteResponse(new RequestVoteResponse

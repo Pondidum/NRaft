@@ -34,10 +34,10 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_there_are_no_nodes_to_send_to()
 		{
-			_state.ForceLog(
+			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = _store.CurrentTerm },
 				new LogEntry { Index = 2, Term = _store.CurrentTerm }
-			);
+			};
 
 			_state.SendAppendEntries();
 
@@ -70,10 +70,10 @@ namespace NRaft.Tests.StateTests
 		public void When_there_is_one_node_and_some_entries_to_be_sent()
 		{
 			_state.AddNodeToCluster(456);
-			_state.ForceLog(
+			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = _store.CurrentTerm },
 				new LogEntry { Index = 2, Term = _store.CurrentTerm }
-			);
+			};
 
 			_state.SendAppendEntries();
 
@@ -104,10 +104,10 @@ namespace NRaft.Tests.StateTests
 			_state.AddNodeToCluster(456);
 			_state.AddNodeToCluster(789);
 
-			_state.ForceLog(
+			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = _store.CurrentTerm },
 				new LogEntry { Index = 2, Term = _store.CurrentTerm }
-			);
+			};
 
 			_state.SendAppendEntries();
 
