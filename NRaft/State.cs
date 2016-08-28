@@ -132,12 +132,14 @@ namespace NRaft
 		{
 			Role = Types.Candidate;
 
-			_store.CurrentTerm++;
-
 			_votesResponded.Clear();
 			_votesGranted.Clear();
 
-			_store.VotedFor = _nodeID;
+			_store.Write(write =>
+			{
+				write.CurrentTerm = _store.CurrentTerm + 1;
+				write.VotedFor = _nodeID;
+			});
 
 			OnRequestVoteResponse(new RequestVoteResponse
 			{
@@ -216,7 +218,10 @@ namespace NRaft
 				Command = value
 			};
 
-			_store.Log = _store.Log.Concat(new[] { newEntry }).ToArray();
+			_store.Write(write =>
+			{
+				write.Log = _store.Log.Concat(new[] { newEntry }).ToArray();
+			});
 		}
 
 		public void AddNodeToCluster(int nodeID)
@@ -263,7 +268,7 @@ namespace NRaft
 				&& (_store.VotedFor.HasValue == false || _store.VotedFor.Value == message.CandidateID);
 
 			if (grant)
-				_store.VotedFor = message.CandidateID;
+				_store.Write(write => write.VotedFor = message.CandidateID);
 
 			return grant;
 		}
@@ -292,7 +297,7 @@ namespace NRaft
 
 			if (message.Term == _store.CurrentTerm && Role == Types.Follower && logOk)
 			{
-				_store.Log = MergeChangeSets(_store.Log, message.Entries);
+				_store.Write(write => write.Log = MergeChangeSets(_store.Log, message.Entries));
 				CommitIndex = Math.Min(message.LeaderCommit, LastIndex());
 				return true;
 			}
@@ -316,10 +321,14 @@ namespace NRaft
 			if (messageTerm <= _store.CurrentTerm)
 				return;
 
-			_store.CurrentTerm = messageTerm;
 			Role = Types.Follower;
-			_store.VotedFor = null;
 
+			_store.Write(write =>
+			{
+				write.CurrentTerm = messageTerm;
+				write.VotedFor = null;
+			});
+			
 		}
 
 		public void ForceCommitIndex(int index)
