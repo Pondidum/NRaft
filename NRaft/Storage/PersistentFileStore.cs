@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Newtonsoft.Json;
 
 namespace NRaft.Storage
@@ -10,11 +9,13 @@ namespace NRaft.Storage
 		public int? VotedFor => _store.Value.VotedFor;
 		public LogEntry[] Log => _store.Value.Log;
 
+		private readonly IFileSystem _fileSystem;
 		private readonly string _path;
 		private readonly Lazy<Dto> _store;
 
-		public PersistentFileStore(string path)
+		public PersistentFileStore(IFileSystem fileSystem, string path)
 		{
+			_fileSystem = fileSystem;
 			_path = path;
 			_store = new Lazy<Dto>(FromDisk);
 		}
@@ -27,12 +28,12 @@ namespace NRaft.Storage
 
 		private Dto FromDisk()
 		{
-			return JsonConvert.DeserializeObject<Dto>(File.ReadAllText(_path));
+			return JsonConvert.DeserializeObject<Dto>(_fileSystem.ReadFile(_path));
 		}
 
 		private void Write()
 		{
-			File.WriteAllText(_path, JsonConvert.SerializeObject(_store.Value));
+			_fileSystem.WriteFile(_path, JsonConvert.SerializeObject(_store.Value));
 		}
 
 		private class Dto : IStoreWriter
