@@ -56,13 +56,13 @@ namespace NRaft.Tests.StateTests
 		public void The_term_increases() => _store.CurrentTerm.ShouldBe(3);
 
 		[Fact]
-		public void The_vote_responses_are_cleared() => _state.VotesResponded.ShouldBeEmpty();
-
-		[Fact]
 		public void The_node_responds_to_itself() => _state.VotesResponded.ShouldBe(new[] { NodeID });
 
 		[Fact]
-		public void The_node_votes_for_itself() => _state.VotesGranted.ShouldBe(new[] { NodeID });
+		public void The_node_grants_a_vote_for_itself() => _state.VotesGranted.ShouldBe(new[] { NodeID });
+
+		[Fact]
+		public void The_node_votes_for_itself() => _store.VotedFor.ShouldBe(NodeID);
 
 		[Fact]
 		public void The_node_requests_votes_from_others() => _connector.Received(1).RequestVotes(Arg.Any<RequestVoteRequest>());

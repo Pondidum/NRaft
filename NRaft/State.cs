@@ -133,10 +133,11 @@ namespace NRaft
 			Role = Types.Candidate;
 
 			_store.CurrentTerm++;
-			_store.VotedFor = null;
 
 			_votesResponded.Clear();
 			_votesGranted.Clear();
+
+			_store.VotedFor = _nodeID;
 
 			OnRequestVoteResponse(new RequestVoteResponse
 			{
