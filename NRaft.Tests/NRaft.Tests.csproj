@@ -83,6 +83,7 @@
     <Compile Include="StateTests\OnRequestVoteTests.cs" />
     <Compile Include="StateTests\SendAppendEntriesTests.cs" />
     <Compile Include="StateTests\StateTests.cs" />
+    <Compile Include="Storage\PersistentFileStoreTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
