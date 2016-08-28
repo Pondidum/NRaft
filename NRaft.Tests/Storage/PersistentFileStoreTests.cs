@@ -43,6 +43,9 @@ namespace NRaft.Tests.Storage
 		[Fact]
 		public void When_a_property_is_read_multiple_times()
 		{
+			_fs.FileExists(Arg.Any<string>()).Returns(true);
+			_fs.ReadFile(Arg.Any<string>()).Returns("{}");
+
 			var t1 = _store.CurrentTerm;
 			var t2 = _store.CurrentTerm;
 
