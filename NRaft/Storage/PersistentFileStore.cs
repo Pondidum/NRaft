@@ -44,6 +44,13 @@ namespace NRaft.Storage
 			public int CurrentTerm { get; set; }
 			public int? VotedFor { get; set; }
 			public LogEntry[] Log { get; set; }
+
+			public Dto()
+			{
+				CurrentTerm = 0;
+				VotedFor = null;
+				Log = new LogEntry[0];
+			}
 		}
 	}
 }
