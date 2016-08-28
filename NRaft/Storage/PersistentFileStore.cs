@@ -28,6 +28,9 @@ namespace NRaft.Storage
 
 		private Dto FromDisk()
 		{
+			if (_fileSystem.FileExists(_path) == false)
+				return new Dto();
+
 			return JsonConvert.DeserializeObject<Dto>(_fileSystem.ReadFile(_path));
 		}
 
