@@ -7,13 +7,14 @@ namespace NRaft.Tests.Storage
 {
 	public class PersistentFileStoreTests
 	{
+		private const string StorePath = "./store.json";
 		private readonly PersistentFileStore _store;
 		private readonly IFileSystem _fs;
 
 		public PersistentFileStoreTests()
 		{
 			_fs = Substitute.For<IFileSystem>();
-			_store = new PersistentFileStore(_fs, "./store.json");
+			_store = new PersistentFileStore(_fs, StorePath);
 		}
 
 		[Fact]
@@ -50,7 +51,63 @@ namespace NRaft.Tests.Storage
 			var t2 = _store.CurrentTerm;
 
 			_fs.Received(1).ReadFile(Arg.Any<string>());
-
 		}
+
+		[Fact]
+		public void When_writing_all_properties()
+		{
+			var fs = new InMemoryFileSystem();
+			var store = new PersistentFileStore(fs, StorePath);
+
+			store.Write(write =>
+			{
+				write.CurrentTerm = 2;
+				write.VotedFor = 14;
+				write.Log = new[]
+				{
+					new LogEntry { Index = 1, Term = 0 },
+				};
+			});
+
+			var expectedJson = "{\r\n  \"CurrentTerm\": 2,\r\n  \"VotedFor\": 14,\r\n  \"Log\": [\r\n    {\r\n      \"Index\": 1,\r\n      \"Term\": 0,\r\n      \"Command\": null\r\n    }\r\n  ]\r\n}";
+
+			fs.ReadFile(StorePath).ShouldBe(expectedJson);
+		}
+
+		[Fact]
+		public void When_writing_a_log_with_inherited_items()
+		{
+			var fs = new InMemoryFileSystem();
+			var writeStore = new PersistentFileStore(fs, StorePath);
+
+			writeStore.Write(write =>
+			{
+				write.CurrentTerm = 2;
+				write.VotedFor = 14;
+				write.Log = new[]
+				{
+					new LogEntry { Index = 1, Term = 24, Command = new Child { Value = 123} },
+					new LogEntry { Index = 2, Term = 25, Command = new Sibling { Text = "abc"} },
+				};
+			});
+
+			var readStore = new PersistentFileStore(fs, StorePath);
+
+			readStore.ShouldSatisfyAllConditions(
+				() => readStore.CurrentTerm.ShouldBe(2),
+				() => readStore.VotedFor.ShouldBe(14),
+				() => readStore.Log[0].Index.ShouldBe(1),
+				() => readStore.Log[0].Term.ShouldBe(24),
+				() => readStore.Log[0].Command.ShouldBeOfType<Child>(),
+				() => readStore.Log[1].Index.ShouldBe(2),
+				() => readStore.Log[1].Term.ShouldBe(25),
+				() => readStore.Log[1].Command.ShouldBeOfType<Sibling>()
+			);
+		}
+
+		private class Parent { }
+		private class Child : Parent { public int Value { get; set; } }
+		private class Sibling : Parent { public string Text { get; set; } }
+
 	}
 }

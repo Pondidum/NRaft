@@ -71,6 +71,7 @@
     <Compile Include="AcceptanceTests.cs" />
     <Compile Include="Infrastructure\QuorumTests.cs" />
     <Compile Include="InMemoryConnector.cs" />
+    <Compile Include="InMemoryFileSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scratchpad.cs" />
     <Compile Include="StateTests\AdvanceCommitIndexTests.cs" />
