@@ -5,6 +5,12 @@ namespace NRaft.Storage
 {
 	public class PersistentFileStore : IStore
 	{
+		private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
+		{
+			Formatting = Formatting.Indented,
+			TypeNameHandling = TypeNameHandling.Auto
+		};
+
 		public int CurrentTerm => _store.Value.CurrentTerm;
 		public int? VotedFor => _store.Value.VotedFor;
 		public LogEntry[] Log => _store.Value.Log;
@@ -31,12 +37,12 @@ namespace NRaft.Storage
 			if (_fileSystem.FileExists(_path) == false)
 				return new Dto();
 
-			return JsonConvert.DeserializeObject<Dto>(_fileSystem.ReadFile(_path));
+			return JsonConvert.DeserializeObject<Dto>(_fileSystem.ReadFile(_path), JsonSettings);
 		}
 
 		private void Write()
 		{
-			_fileSystem.WriteFile(_path, JsonConvert.SerializeObject(_store.Value));
+			_fileSystem.WriteFile(_path, JsonConvert.SerializeObject(_store.Value, JsonSettings));
 		}
 
 		private class Dto : IStoreWriter
