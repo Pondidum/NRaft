@@ -15,8 +15,8 @@ namespace NRaft.Tests
 			var firstStore = new InMemoryStore();
 			var secondStore = new InMemoryStore();
 
-			var first = new State(firstStore, dispatcher, 1);
-			var second = new State(secondStore, dispatcher, 2);
+			var first = new Node(firstStore, dispatcher, 1);
+			var second = new Node(secondStore, dispatcher, 2);
 
 			first.AddNodeToCluster(2);
 			second.AddNodeToCluster(1);

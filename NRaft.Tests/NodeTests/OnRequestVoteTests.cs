@@ -6,13 +6,13 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class OnRequestVoteTests
 	{
 		private const int CurrentTerm = 5;
 
-		private readonly State _state;
+		private readonly Node _node;
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 
@@ -23,7 +23,7 @@ namespace NRaft.Tests.StateTests
 
 			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_store, _connector, 10);
+			_node = new Node(_store, _connector, 10);
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },
@@ -33,13 +33,13 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 6, Term = 4 },
 				new LogEntry { Index = 7, Term = 5 }
 			};
-			_state.ForceCommitIndex(7);
+			_node.ForceCommitIndex(7);
 		}
 
 		[Fact]
 		public void When_a_message_has_a_newer_term()
 		{
-			_state.OnRequestVote(new RequestVoteRequest
+			_node.OnRequestVote(new RequestVoteRequest
 			{
 				Term = CurrentTerm + 1,
 			});
@@ -58,7 +58,7 @@ namespace NRaft.Tests.StateTests
 				LastLogTerm = _store.Log.Last().Term
 			};
 
-			_state.OnRequestVote(message);
+			_node.OnRequestVote(message);
 
 			_connector
 				.Received()
@@ -77,7 +77,7 @@ namespace NRaft.Tests.StateTests
 			};
 
 			_store.VotedFor = 15;
-			_state.OnRequestVote(message);
+			_node.OnRequestVote(message);
 
 			_connector
 				.Received()
@@ -94,7 +94,7 @@ namespace NRaft.Tests.StateTests
 				LastLogIndex = 5
 			};
 
-			_state.OnRequestVote(message);
+			_node.OnRequestVote(message);
 
 			_connector
 				.Received()
@@ -112,7 +112,7 @@ namespace NRaft.Tests.StateTests
 				LastLogTerm = _store.Log.Last().Term
 			};
 
-			_state.OnRequestVote(message);
+			_node.OnRequestVote(message);
 
 			_connector
 				.Received()

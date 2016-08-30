@@ -7,14 +7,14 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class SendAppendEntriesTests
 	{
 		private const int NodeID = 1234;
 
 		private readonly IConnector _connector;
-		private readonly State _state;
+		private readonly Node _node;
 		private readonly List<AppendEntriesRequest> _messages;
 		private readonly InMemoryStore _store;
 
@@ -28,7 +28,7 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _messages.Add(cb.Arg<AppendEntriesRequest>()));
 
-			_state = new State(_store,_connector, NodeID);
+			_node = new Node(_store,_connector, NodeID);
 		}
 
 		[Fact]
@@ -39,7 +39,7 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 2, Term = _store.CurrentTerm }
 			};
 
-			_state.SendAppendEntries();
+			_node.SendAppendEntries();
 
 			_connector.DidNotReceive().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 		}
@@ -47,9 +47,9 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_there_is_one_node_and_no_pending_entries_to_be_sent()
 		{
-			_state.AddNodeToCluster(456);
+			_node.AddNodeToCluster(456);
 
-			_state.SendAppendEntries();
+			_node.SendAppendEntries();
 
 			_connector.Received().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 
@@ -69,13 +69,13 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_there_is_one_node_and_some_entries_to_be_sent()
 		{
-			_state.AddNodeToCluster(456);
+			_node.AddNodeToCluster(456);
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = _store.CurrentTerm },
 				new LogEntry { Index = 2, Term = _store.CurrentTerm }
 			};
 
-			_state.SendAppendEntries();
+			_node.SendAppendEntries();
 
 			_connector.Received().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 
@@ -101,15 +101,15 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void When_there_are_multiple_nodes_and_some_entries_to_be_sent()
 		{
-			_state.AddNodeToCluster(456);
-			_state.AddNodeToCluster(789);
+			_node.AddNodeToCluster(456);
+			_node.AddNodeToCluster(789);
 
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = _store.CurrentTerm },
 				new LogEntry { Index = 2, Term = _store.CurrentTerm }
 			};
 
-			_state.SendAppendEntries();
+			_node.SendAppendEntries();
 
 			_connector.Received(2).SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 		}

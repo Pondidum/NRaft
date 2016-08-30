@@ -5,14 +5,14 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class OnRequestVoteResponseTests
 	{
 		private const int CurrentTerm = 5;
 
 		private readonly InMemoryStore _store;
-		private readonly State _state;
+		private readonly Node _node;
 
 		public OnRequestVoteResponseTests()
 		{
@@ -21,14 +21,14 @@ namespace NRaft.Tests.StateTests
 
 			var dispatcher = Substitute.For<IConnector>();
 
-			_state = new State(_store, dispatcher, 10);
-			_state.ForceType(Types.Candidate);
+			_node = new Node(_store, dispatcher, 10);
+			_node.ForceType(Types.Candidate);
 		}
 
 		[Fact]
 		public void When_a_message_has_a_newer_term()
 		{
-			_state.OnRequestVoteResponse(new RequestVoteResponse
+			_node.OnRequestVoteResponse(new RequestVoteResponse
 			{
 				Term = CurrentTerm + 1,
 			});
@@ -45,10 +45,10 @@ namespace NRaft.Tests.StateTests
 				VoteGranted = true
 			};
 
-			_state.OnRequestVoteResponse(message);
+			_node.OnRequestVoteResponse(message);
 
-			_state.VotesResponded.ShouldBeEmpty();
-			_state.VotesGranted.ShouldBeEmpty();
+			_node.VotesResponded.ShouldBeEmpty();
+			_node.VotesGranted.ShouldBeEmpty();
 		}
 
 		[Fact]
@@ -61,10 +61,10 @@ namespace NRaft.Tests.StateTests
 				VoteGranted = false
 			};
 
-			_state.OnRequestVoteResponse(message);
+			_node.OnRequestVoteResponse(message);
 
-			_state.VotesResponded.ShouldBe(new[] { message.GranterID });
-			_state.VotesGranted.ShouldBeEmpty();
+			_node.VotesResponded.ShouldBe(new[] { message.GranterID });
+			_node.VotesGranted.ShouldBeEmpty();
 		}
 
 		[Fact]
@@ -77,10 +77,10 @@ namespace NRaft.Tests.StateTests
 				VoteGranted = true
 			};
 
-			_state.OnRequestVoteResponse(message);
+			_node.OnRequestVoteResponse(message);
 
-			_state.VotesResponded.ShouldBe(new[] { message.GranterID });
-			_state.VotesGranted.ShouldBe(new[] { message.GranterID });
+			_node.VotesResponded.ShouldBe(new[] { message.GranterID });
+			_node.VotesGranted.ShouldBe(new[] { message.GranterID });
 		}
 	}
 }

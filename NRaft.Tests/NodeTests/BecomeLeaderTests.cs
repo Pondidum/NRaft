@@ -7,7 +7,7 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class BecomeLeaderTests
 	{
@@ -17,7 +17,7 @@ namespace NRaft.Tests.StateTests
 
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
-		private readonly State _state;
+		private readonly Node _node;
 
 		public BecomeLeaderTests()
 		{
@@ -29,10 +29,10 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _heartbeat = cb.Arg<AppendEntriesRequest>());
 
-			_state = new State(_store, _connector, NodeID);
+			_node = new Node(_store, _connector, NodeID);
 
-			_state.BecomeCandidate();
-			_state.ForceCommitIndex(3);
+			_node.BecomeCandidate();
+			_node.ForceCommitIndex(3);
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 0 },
@@ -41,8 +41,8 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 5, Term = 2 }
 			};
 
-			_state.AddNodeToCluster(15);
-			_state.OnRequestVoteResponse(new RequestVoteResponse
+			_node.AddNodeToCluster(15);
+			_node.OnRequestVoteResponse(new RequestVoteResponse
 			{
 				GranterID = 15,
 				Term = _store.CurrentTerm,
@@ -53,70 +53,70 @@ namespace NRaft.Tests.StateTests
 		[Fact]
 		public void If_the_node_is_not_a_candidate()
 		{
-			_state.ForceType(Types.Follower);
-			_state.BecomeLeader();
+			_node.ForceType(Types.Follower);
+			_node.BecomeLeader();
 
-			_state.Role.ShouldBe(Types.Follower);
+			_node.Role.ShouldBe(Types.Follower);
 		}
 
 		[Fact]
 		public void When_a_vote_has_not_been_granted()
 		{
-			_state.ResetVotes();
+			_node.ResetVotes();
 
-			_state.BecomeLeader();
+			_node.BecomeLeader();
 
-			_state.Role.ShouldBe(Types.Candidate);
+			_node.Role.ShouldBe(Types.Candidate);
 		}
 
 		[Fact]
 		public void The_role_changes()
 		{
-			_state.BecomeLeader();
-			_state.Role.ShouldBe(Types.Leader);
+			_node.BecomeLeader();
+			_node.Role.ShouldBe(Types.Leader);
 		}
 
 		[Fact]
 		public void The_next_index_for_every_other_client_is_set_to_last_log_index()
 		{
-			_state.BecomeLeader();
+			_node.BecomeLeader();
 
 			var nextLogIndex = _store.Log.Last().Index + 1;
 
-			var outcomes = _state
+			var outcomes = _node
 				.KnownNodes
-				.Select(node => new Action(() => _state.NextIndexFor(node).ShouldBe(nextLogIndex)))
+				.Select(node => new Action(() => _node.NextIndexFor(node).ShouldBe(nextLogIndex)))
 				.ToArray();
 
-			_state.ShouldSatisfyAllConditions(outcomes);
+			_node.ShouldSatisfyAllConditions(outcomes);
 		}
 
 		[Fact]
 		public void The_match_index_for_every_other_client_is_set_to_zero()
 		{
-			_state.BecomeLeader();
+			_node.BecomeLeader();
 
-			var outcomes = _state
+			var outcomes = _node
 				.KnownNodes
-				.Select(node => new Action(() => _state.MatchIndexFor(node).ShouldBe(0)))
+				.Select(node => new Action(() => _node.MatchIndexFor(node).ShouldBe(0)))
 				.ToArray();
 
-			_state.ShouldSatisfyAllConditions(outcomes);
+			_node.ShouldSatisfyAllConditions(outcomes);
 		}
 
 		[Fact]
 		public void It_sends_append_entries_to_all()
 		{
-			_state.BecomeLeader();
+			_node.BecomeLeader();
 
-			var index = _state.NextIndexFor(_heartbeat.RecipientID) - 1;
+			var index = _node.NextIndexFor(_heartbeat.RecipientID) - 1;
 
 			_heartbeat.ShouldSatisfyAllConditions(
 				() => _heartbeat.LeaderID.ShouldBe(NodeID),
 				() => _heartbeat.Term.ShouldBe(_store.CurrentTerm),
 				() => _heartbeat.PreviousLogIndex.ShouldBe(index),
 				() => _heartbeat.PreviousLogTerm.ShouldBe(_store.Log.Single(e => e.Index == index).Term),
-				() => _heartbeat.LeaderCommit.ShouldBe(_state.CommitIndex),
+				() => _heartbeat.LeaderCommit.ShouldBe(_node.CommitIndex),
 				() => _heartbeat.Entries.ShouldBeEmpty()
 			);
 		}

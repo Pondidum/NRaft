@@ -5,12 +5,12 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class OnClientRequestTests
 	{
 		private readonly InMemoryStore _store;
-		private readonly State _state;
+		private readonly Node _node;
 
 		public OnClientRequestTests()
 		{
@@ -18,13 +18,13 @@ namespace NRaft.Tests.StateTests
 
 			var dispatcher = Substitute.For<IConnector>();
 
-			_state = new State(_store, dispatcher, 1234);
+			_node = new Node(_store, dispatcher, 1234);
 		}
 
 		[Fact]
 		public void When_the_node_is_not_the_leader()
 		{
-			_state.OnClientRequest(new Dto { Value = "abc" });
+			_node.OnClientRequest(new Dto { Value = "abc" });
 
 			_store.Log.ShouldBeEmpty();
 		}
@@ -34,8 +34,8 @@ namespace NRaft.Tests.StateTests
 		{
 			var value = new Dto { Value = "abc" };
 
-			_state.ForceType(Types.Leader);
-			_state.OnClientRequest(value);
+			_node.ForceType(Types.Leader);
+			_node.OnClientRequest(value);
 
 			_store.Log.Single().Command.ShouldBe(value);
 		}

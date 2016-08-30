@@ -6,7 +6,7 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class BecomeCandidateTests
 	{
@@ -14,7 +14,7 @@ namespace NRaft.Tests.StateTests
 
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
-		private readonly State _state;
+		private readonly Node _node;
 
 		private RequestVoteRequest _response;
 
@@ -28,9 +28,9 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.RequestVotes(Arg.Any<RequestVoteRequest>()))
 				.Do(cb => _response = cb.Arg<RequestVoteRequest>());
 
-			_state = new State(_store, _connector, NodeID);
+			_node = new Node(_store, _connector, NodeID);
 
-			_state.OnRequestVoteResponse(new RequestVoteResponse
+			_node.OnRequestVoteResponse(new RequestVoteResponse
 			{
 				CandidateID = NodeID,
 				GranterID = 456,
@@ -46,20 +46,20 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 5, Term = 2 }
 			};
 
-			_state.BecomeCandidate();
+			_node.BecomeCandidate();
 		}
 
 		[Fact]
-		public void The_role_changes() => _state.Role.ShouldBe(Types.Candidate);
+		public void The_role_changes() => _node.Role.ShouldBe(Types.Candidate);
 
 		[Fact]
 		public void The_term_increases() => _store.CurrentTerm.ShouldBe(3);
 
 		[Fact]
-		public void The_node_responds_to_itself() => _state.VotesResponded.ShouldBe(new[] { NodeID });
+		public void The_node_responds_to_itself() => _node.VotesResponded.ShouldBe(new[] { NodeID });
 
 		[Fact]
-		public void The_node_grants_a_vote_for_itself() => _state.VotesGranted.ShouldBe(new[] { NodeID });
+		public void The_node_grants_a_vote_for_itself() => _node.VotesGranted.ShouldBe(new[] { NodeID });
 
 		[Fact]
 		public void The_node_votes_for_itself() => _store.VotedFor.ShouldBe(NodeID);

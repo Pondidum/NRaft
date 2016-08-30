@@ -5,9 +5,9 @@ using NRaft.Storage;
 using NSubstitute;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
-	public class StateTests
+	public class NodeTests
 	{
 		[Fact]
 		public void When_disposing_all_listeners_are_removed()
@@ -15,7 +15,7 @@ namespace NRaft.Tests.StateTests
 			var store = new InMemoryStore();
 			var connector = Substitute.For<IConnector>();
 
-			using (var node = new State(store, connector, 1))
+			using (var node = new Node(store, connector, 1))
 			{
 			}
 

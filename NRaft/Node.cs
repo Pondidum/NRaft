@@ -7,7 +7,7 @@ using NRaft.Storage;
 
 namespace NRaft
 {
-	public class State : IDisposable
+	public class Node : IDisposable
 	{
 		private readonly IStore _store;
 		private readonly IConnector _connector;
@@ -29,7 +29,7 @@ namespace NRaft
 		private readonly HashSet<int> _votesGranted;
 
 
-		public State(IStore store, IConnector connector, int nodeID)
+		public Node(IStore store, IConnector connector, int nodeID)
 		{
 			_store = store;
 			_connector = connector;

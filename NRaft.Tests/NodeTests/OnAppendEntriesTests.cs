@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Runtime.InteropServices;
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
@@ -7,7 +6,7 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class OnAppendEntriesTests
 	{
@@ -15,7 +14,7 @@ namespace NRaft.Tests.StateTests
 
 		private AppendEntriesResponse _response;
 
-		private readonly State _state;
+		private readonly Node _node;
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 
@@ -29,7 +28,7 @@ namespace NRaft.Tests.StateTests
 				.When(d => d.SendReply(Arg.Any<AppendEntriesResponse>()))
 				.Do(cb => _response = cb.Arg<AppendEntriesResponse>());
 
-			_state = new State(_store, _connector, 10);
+			_node = new Node(_store, _connector, 10);
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },
@@ -40,13 +39,13 @@ namespace NRaft.Tests.StateTests
 				new LogEntry { Index = 7, Term = 5 },
 				new LogEntry { Index = 8, Term = 6 }
 			};
-			_state.ForceCommitIndex(7);
+			_node.ForceCommitIndex(7);
 		}
 
 		[Fact]
 		public void When_a_message_has_a_newer_term()
 		{
-			_state.OnAppendEntries(new AppendEntriesRequest
+			_node.OnAppendEntries(new AppendEntriesRequest
 			{
 				Term = CurrentTerm + 1,
 			});
@@ -62,7 +61,7 @@ namespace NRaft.Tests.StateTests
 				Term = 3
 			};
 
-			_state.OnAppendEntries(message);
+			_node.OnAppendEntries(message);
 
 			_response.ShouldSatisfyAllConditions(
 				() => _response.Success.ShouldBeFalse(),
@@ -80,7 +79,7 @@ namespace NRaft.Tests.StateTests
 				PreviousLogIndex = 2,
 			};
 
-			_state.OnAppendEntries(message);
+			_node.OnAppendEntries(message);
 
 			_response.ShouldSatisfyAllConditions(
 				() => _response.Success.ShouldBeFalse(),
@@ -105,7 +104,7 @@ namespace NRaft.Tests.StateTests
 				}
 			};
 
-			_state.OnAppendEntries(message);
+			_node.OnAppendEntries(message);
 
 			_store.Log.ShouldBe(new[]
 			{
@@ -136,9 +135,9 @@ namespace NRaft.Tests.StateTests
 				LeaderCommit = 7
 			};
 
-			_state.OnAppendEntries(message);
+			_node.OnAppendEntries(message);
 
-			_state.CommitIndex.ShouldBe(7);
+			_node.CommitIndex.ShouldBe(7);
 
 			_response.ShouldSatisfyAllConditions(
 				() => _response.Success.ShouldBeTrue(),
@@ -165,9 +164,9 @@ namespace NRaft.Tests.StateTests
 				}
 			};
 
-			_state.OnAppendEntries(message);
+			_node.OnAppendEntries(message);
 
-			_state.CommitIndex.ShouldBe(8);
+			_node.CommitIndex.ShouldBe(8);
 
 			_response.ShouldSatisfyAllConditions(
 				() => _response.Success.ShouldBeTrue(),
@@ -194,9 +193,9 @@ namespace NRaft.Tests.StateTests
 				}
 			};
 
-			_state.OnAppendEntries(message);
+			_node.OnAppendEntries(message);
 
-			_state.CommitIndex.ShouldBe(9);
+			_node.CommitIndex.ShouldBe(9);
 
 			_response.ShouldSatisfyAllConditions(
 				() => _response.Success.ShouldBeTrue(),
@@ -213,13 +212,13 @@ namespace NRaft.Tests.StateTests
 				Term = CurrentTerm,
 				PreviousLogIndex = _store.Log.Last().Index,
 				PreviousLogTerm = _store.Log.Last().Term,
-				LeaderCommit = _state.CommitIndex
+				LeaderCommit = _node.CommitIndex
 			};
 
-			_state.ForceType(Types.Candidate);
-			_state.OnAppendEntries(message);
+			_node.ForceType(Types.Candidate);
+			_node.OnAppendEntries(message);
 
-			_state.Role.ShouldBe(Types.Follower);
+			_node.Role.ShouldBe(Types.Follower);
 		}
 	}
 }

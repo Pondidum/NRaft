@@ -5,7 +5,7 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace NRaft.Tests.StateTests
+namespace NRaft.Tests.NodeTests
 {
 	public class OnAppendEntriesResponseTests
 	{
@@ -13,7 +13,7 @@ namespace NRaft.Tests.StateTests
 
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
-		private readonly State _state;
+		private readonly Node _node;
 
 		public OnAppendEntriesResponseTests()
 		{
@@ -22,14 +22,14 @@ namespace NRaft.Tests.StateTests
 
 			_connector = Substitute.For<IConnector>();
 
-			_state = new State(_store, _connector, 10);
-			_state.ForceType(Types.Leader);
+			_node = new Node(_store, _connector, 10);
+			_node.ForceType(Types.Leader);
 		}
 
 		[Fact]
 		public void When_a_message_has_a_newer_term()
 		{
-			_state.OnAppendEntriesResponse(new AppendEntriesResponse
+			_node.OnAppendEntriesResponse(new AppendEntriesResponse
 			{
 				Term = CurrentTerm + 1,
 			});
@@ -47,10 +47,10 @@ namespace NRaft.Tests.StateTests
 				Success = true
 			};
 
-			_state.OnAppendEntriesResponse(message);
+			_node.OnAppendEntriesResponse(message);
 
 			_store.CurrentTerm.ShouldBe(CurrentTerm);
-			_state.NextIndexFor(message.FollowerID).ShouldBe(1);
+			_node.NextIndexFor(message.FollowerID).ShouldBe(1);
 		}
 
 		[Fact]
@@ -64,9 +64,9 @@ namespace NRaft.Tests.StateTests
 				MatchIndex = 11,
 			};
 
-			_state.OnAppendEntriesResponse(message);
+			_node.OnAppendEntriesResponse(message);
 
-			_state.NextIndexFor(message.FollowerID).ShouldBe(10);
+			_node.NextIndexFor(message.FollowerID).ShouldBe(10);
 		}
 
 		[Fact]
@@ -80,9 +80,9 @@ namespace NRaft.Tests.StateTests
 				MatchIndex = 1,
 			};
 
-			_state.OnAppendEntriesResponse(message);
+			_node.OnAppendEntriesResponse(message);
 
-			_state.NextIndexFor(message.FollowerID).ShouldBe(1);
+			_node.NextIndexFor(message.FollowerID).ShouldBe(1);
 		}
 
 		[Fact]
@@ -96,10 +96,10 @@ namespace NRaft.Tests.StateTests
 				MatchIndex = 10,
 			};
 
-			_state.OnAppendEntriesResponse(message);
+			_node.OnAppendEntriesResponse(message);
 
-			_state.NextIndexFor(message.FollowerID).ShouldBe(11);
-			_state.MatchIndexFor(message.FollowerID).ShouldBe(10);
+			_node.NextIndexFor(message.FollowerID).ShouldBe(11);
+			_node.MatchIndexFor(message.FollowerID).ShouldBe(10);
 		}
 	}
 }
