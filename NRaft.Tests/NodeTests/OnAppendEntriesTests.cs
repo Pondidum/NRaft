@@ -207,16 +207,16 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_the_node_is_a_candidate_and_the_terms_are_equal()
 		{
-			var message = new AppendEntriesRequest
+			_store.CurrentTerm = _store.CurrentTerm - 1;
+			_node.BecomeCandidate();
+
+			_node.OnAppendEntries(new AppendEntriesRequest
 			{
 				Term = CurrentTerm,
 				PreviousLogIndex = _store.Log.Last().Index,
 				PreviousLogTerm = _store.Log.Last().Term,
 				LeaderCommit = _node.CommitIndex
-			};
-
-			_node.ForceType(Types.Candidate);
-			_node.OnAppendEntries(message);
+			});
 
 			_node.Role.ShouldBe(Types.Follower);
 		}

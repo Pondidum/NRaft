@@ -9,6 +9,7 @@ namespace NRaft.Tests.NodeTests
 {
 	public class OnRequestVoteResponseTests
 	{
+		private const int NodeID = 10;
 		private const int CurrentTerm = 5;
 
 		private readonly InMemoryStore _store;
@@ -17,12 +18,12 @@ namespace NRaft.Tests.NodeTests
 		public OnRequestVoteResponseTests()
 		{
 			_store = new InMemoryStore();
-			_store.CurrentTerm = CurrentTerm;
+			_store.CurrentTerm = CurrentTerm - 1;
 
 			var dispatcher = Substitute.For<IConnector>();
 
-			_node = new Node(_store, dispatcher, 10);
-			_node.ForceType(Types.Candidate);
+			_node = new Node(_store, dispatcher, NodeID);
+			_node.BecomeCandidate();
 		}
 
 		[Fact]
@@ -47,8 +48,8 @@ namespace NRaft.Tests.NodeTests
 
 			_node.OnRequestVoteResponse(message);
 
-			_node.VotesResponded.ShouldBeEmpty();
-			_node.VotesGranted.ShouldBeEmpty();
+			_node.VotesResponded.ShouldBe(new[] { NodeID });
+			_node.VotesGranted.ShouldBe(new[] { NodeID });
 		}
 
 		[Fact]
@@ -63,8 +64,8 @@ namespace NRaft.Tests.NodeTests
 
 			_node.OnRequestVoteResponse(message);
 
-			_node.VotesResponded.ShouldBe(new[] { message.GranterID });
-			_node.VotesGranted.ShouldBeEmpty();
+			_node.VotesResponded.ShouldBe(new[] { NodeID, message.GranterID });
+			_node.VotesGranted.ShouldBe(new[] { NodeID });
 		}
 
 		[Fact]
@@ -79,8 +80,8 @@ namespace NRaft.Tests.NodeTests
 
 			_node.OnRequestVoteResponse(message);
 
-			_node.VotesResponded.ShouldBe(new[] { message.GranterID });
-			_node.VotesGranted.ShouldBe(new[] { message.GranterID });
+			_node.VotesResponded.ShouldBe(new[] { NodeID, message.GranterID });
+			_node.VotesGranted.ShouldBe(new[] { NodeID, message.GranterID });
 		}
 	}
 }
