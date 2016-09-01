@@ -37,6 +37,8 @@ namespace NRaft
 			_knownNodes = new HashSet<int>();
 			_quorum = new HashSet<HashSet<int>>();
 
+			AddNodeToCluster(nodeID);
+
 			_nextIndex = new LightweightCache<int, int>(id => 1);
 			_matchIndex = new LightweightCache<int, int>(id => 1);
 
@@ -240,14 +242,15 @@ namespace NRaft
 				var nodes = _matchIndex
 					.Dictionary
 					.Where(pair => pair.Value >= index)
-					.Select(pair => pair.Key);
+					.Select(pair => pair.Key)
+					.Concat(new[] { _nodeID });
 
 				return new HashSet<int>(nodes);
 			};
 
 			var agreeIndexes = _store.Log
 				.Select(e => e.Index)
-				.Where(index => KnownNodes.Any() == false || _quorum.Any(q => q.SetEquals(agree(index))))
+				.Where(index => _quorum.Any(q => q.SetEquals(agree(index))))
 				.ToArray();
 
 			if (agreeIndexes.Any() && _store.Log.Single(e => e.Index == agreeIndexes.Max()).Term == _store.CurrentTerm)
@@ -328,7 +331,7 @@ namespace NRaft
 				write.CurrentTerm = messageTerm;
 				write.VotedFor = null;
 			});
-			
+
 		}
 
 		public void ForceCommitIndex(int index)

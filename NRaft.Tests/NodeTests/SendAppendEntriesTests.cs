@@ -41,7 +41,7 @@ namespace NRaft.Tests.NodeTests
 
 			_node.SendAppendEntries();
 
-			_connector.DidNotReceive().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
+			_connector.Received(_node.KnownNodes.Count()).SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 		}
 
 		[Fact]
@@ -53,7 +53,7 @@ namespace NRaft.Tests.NodeTests
 
 			_connector.Received().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 
-			var message = _messages.Single();
+			var message = _messages.Last();
 
 			message.ShouldSatisfyAllConditions(
 				() => message.LeaderID.ShouldBe(NodeID),
@@ -79,7 +79,7 @@ namespace NRaft.Tests.NodeTests
 
 			_connector.Received().SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 
-			var message = _messages.Single();
+			var message = _messages.Last();
 
 			message.ShouldSatisfyAllConditions(
 				() => message.LeaderID.ShouldBe(NodeID),
@@ -111,7 +111,7 @@ namespace NRaft.Tests.NodeTests
 
 			_node.SendAppendEntries();
 
-			_connector.Received(2).SendHeartbeat(Arg.Any<AppendEntriesRequest>());
+			_connector.Received(_node.KnownNodes.Count()).SendHeartbeat(Arg.Any<AppendEntriesRequest>());
 		}
 	}
 }
