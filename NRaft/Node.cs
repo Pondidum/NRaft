@@ -301,7 +301,7 @@ namespace NRaft
 			if (message.Term == _store.CurrentTerm && Role == Types.Follower && logOk)
 			{
 				_store.Write(write => write.Log = MergeChangeSets(_store.Log, message.Entries));
-				CommitIndex = Math.Min(message.LeaderCommit, LastIndex());
+				CommitIndex = message.LeaderCommit;
 				return true;
 			}
 

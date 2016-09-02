@@ -195,7 +195,7 @@ namespace NRaft.Tests.NodeTests
 
 			_node.OnAppendEntries(message);
 
-			_node.CommitIndex.ShouldBe(9);
+			_node.CommitIndex.ShouldBe(message.LeaderCommit);
 
 			_response.ShouldSatisfyAllConditions(
 				() => _response.Success.ShouldBeTrue(),

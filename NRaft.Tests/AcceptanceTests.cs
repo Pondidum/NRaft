@@ -38,8 +38,16 @@ namespace NRaft.Tests
 			first.CommitIndex.ShouldBe(0);
 
 			first.SendAppendEntries();
+			first.AdvanceCommitIndex();
+
 			firstStore.Log.Last().Command.ShouldBe("testing");
 			secondStore.Log.Last().Command.ShouldBe("testing");
+
+			second.CommitIndex.ShouldBe(0);
+
+			first.SendAppendEntries();
+
+			second.CommitIndex.ShouldBe(1);
 
 			first.AdvanceCommitIndex();
 			first.CommitIndex.ShouldBe(1);
