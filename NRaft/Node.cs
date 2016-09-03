@@ -339,11 +339,6 @@ namespace NRaft
 
 		}
 
-		public void ForceCommitIndex(int index)
-		{
-			CommitIndex = index;
-		}
-
 		public void Dispose()
 		{
 			_connector.Deregister(_nodeID, OnAppendEntries);

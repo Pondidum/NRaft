@@ -24,12 +24,16 @@ namespace NRaft.Tests.NodeTests
 			_node = new Node(_store, _connector, NodeID);
 			_node.BecomeCandidate();
 			_node.BecomeLeader();
-			_node.ForceCommitIndex(2);
+
+			//create committed log
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
-				new LogEntry { Index = 2, Term = 0 },
-				new LogEntry { Index = 3, Term = 1 }
+				new LogEntry { Index = 2, Term = 1 },
 			};
+			_node.AdvanceCommitIndex();
+
+			//push on a new un-committed item
+			_node.OnClientRequest(null);
 		}
 
 		[Fact]
@@ -40,16 +44,6 @@ namespace NRaft.Tests.NodeTests
 			_node.AdvanceCommitIndex();
 
 			_node.CommitIndex.ShouldBe(2);
-		}
-
-		[Fact]
-		public void When_single_node_and_there_are_no_more_entries_to_commit()
-		{
-			_node.ForceCommitIndex(3);
-
-			_node.AdvanceCommitIndex();
-
-			_node.CommitIndex.ShouldBe(3);
 		}
 
 		//not sure if this is a valid case - can raft operate with 1 node only?
@@ -63,13 +57,14 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_three_nodes_and_there_are_no_more_entries_to_commit()
 		{
+			_store.Log = _store.Log.Take(2).ToArray();
+
 			_node.AddNodeToCluster(22);
 			_node.AddNodeToCluster(33);
-			_node.ForceCommitIndex(3);
 
 			_node.AdvanceCommitIndex();
 
-			_node.CommitIndex.ShouldBe(3);
+			_node.CommitIndex.ShouldBe(2);
 		}
 
 		[Fact]

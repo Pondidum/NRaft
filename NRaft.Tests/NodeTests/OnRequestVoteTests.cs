@@ -33,7 +33,7 @@ namespace NRaft.Tests.NodeTests
 				new LogEntry { Index = 6, Term = 4 },
 				new LogEntry { Index = 7, Term = 5 }
 			};
-			_node.ForceCommitIndex(7);
+			//_node.ForceCommitIndex(7);
 		}
 
 		[Fact]

@@ -32,7 +32,7 @@ namespace NRaft.Tests.NodeTests
 			_node = new Node(_store, _connector, NodeID);
 
 			_node.BecomeCandidate();
-			_node.ForceCommitIndex(3);
+
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 0 },
