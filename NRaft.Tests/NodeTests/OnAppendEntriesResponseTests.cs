@@ -23,7 +23,7 @@ namespace NRaft.Tests.NodeTests
 			_connector = Substitute.For<IConnector>();
 
 			_node = new Node(_store, _connector, 10);
-			_node.ForceType(Types.Leader);
+			_node.BecomeLeader();
 		}
 
 		[Fact]

@@ -34,7 +34,9 @@ namespace NRaft.Tests.NodeTests
 		{
 			var value = new Dto { Value = "abc" };
 
-			_node.ForceType(Types.Leader);
+			_node.BecomeCandidate();
+			_node.BecomeLeader();
+
 			_node.OnClientRequest(value);
 
 			_store.Log.Single().Command.ShouldBe(value);

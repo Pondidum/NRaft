@@ -23,7 +23,7 @@ namespace NRaft.Tests.NodeTests
 
 			_node = new Node(_store, _connector, NodeID);
 			_node.BecomeCandidate();
-			_node.ForceType(Types.Leader);
+			_node.BecomeLeader();
 			_node.ForceCommitIndex(2);
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
