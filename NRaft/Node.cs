@@ -45,7 +45,7 @@ namespace NRaft
 			_votesResponded = new HashSet<int>();
 			_votesGranted = new HashSet<int>();
 
-			Role = Types.Follower;
+			BecomeFollower();
 
 			CommitIndex = 0;
 
@@ -128,6 +128,11 @@ namespace NRaft
 		{
 			_votesResponded.Clear();
 			_votesGranted.Clear();
+		}
+
+		public void BecomeFollower()
+		{
+			Role = Types.Follower;
 		}
 
 		public void BecomeCandidate()
@@ -294,7 +299,7 @@ namespace NRaft
 
 			if (message.Term == _store.CurrentTerm && Role == Types.Candidate)
 			{
-				Role = Types.Follower;
+				BecomeFollower();
 				return true;
 			}
 
@@ -324,7 +329,7 @@ namespace NRaft
 			if (messageTerm <= _store.CurrentTerm)
 				return;
 
-			Role = Types.Follower;
+			BecomeFollower();
 
 			_store.Write(write =>
 			{
@@ -337,11 +342,6 @@ namespace NRaft
 		public void ForceCommitIndex(int index)
 		{
 			CommitIndex = index;
-		}
-
-		public void ForceType(Types type)
-		{
-			Role = type;
 		}
 
 		public void Dispose()

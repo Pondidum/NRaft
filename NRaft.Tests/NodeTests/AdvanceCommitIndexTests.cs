@@ -35,7 +35,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_not_a_leader()
 		{
-			_node.ForceType(Types.Follower);
+			_node.BecomeFollower();
 
 			_node.AdvanceCommitIndex();
 

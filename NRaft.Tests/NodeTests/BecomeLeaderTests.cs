@@ -53,7 +53,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void If_the_node_is_not_a_candidate()
 		{
-			_node.ForceType(Types.Follower);
+			_node.BecomeFollower();
 			_node.BecomeLeader();
 
 			_node.Role.ShouldBe(Types.Follower);
