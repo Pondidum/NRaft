@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace NRaft.Infrastructure
 {
-	public class Timeout : IDisposable
+	public class Timeout : IPulseable
 	{
 		private DateTime _pulsedAt;
 		private Task _task;
