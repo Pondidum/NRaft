@@ -12,7 +12,7 @@ namespace NRaft.Infrastructure
 			};
 		}
 
-		public IPulseable CreatePulseMonitor(TimeSpan maxBetweenPulses, Action pulse, Action elapsed)
+		public IPulseable CreatePulseMonitor(TimeSpan maxBetweenPulses, Action elapsed)
 		{
 			return new Timeout(elapsed)
 			{
