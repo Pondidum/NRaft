@@ -27,6 +27,7 @@ namespace NRaft
 		//candidate0only state - perhaps subclass or extract
 		private readonly HashSet<int> _votesResponded;
 		private readonly HashSet<int> _votesGranted;
+		private readonly IPulseable _heart;
 
 		public Node(IStore store, IClock clock, IConnector connector, int nodeID)
 		{
@@ -52,6 +53,8 @@ namespace NRaft
 			_connector.Register(_nodeID, OnAppendEntriesResponse);
 			_connector.Register(_nodeID, OnRequestVote);
 			_connector.Register(_nodeID, OnRequestVoteResponse);
+
+			_heart = clock.CreatePulseMonitor(TimeSpan.FromMilliseconds(350), OnHeartbeatElapsed); //should be random...
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;
@@ -63,6 +66,8 @@ namespace NRaft
 
 		public void OnAppendEntries(AppendEntriesRequest message)
 		{
+			_heart.Pulse();
+
 			UpdateTerm(message.Term);
 
 			var success = AppendEntries(message);
@@ -335,7 +340,12 @@ namespace NRaft
 				write.CurrentTerm = messageTerm;
 				write.VotedFor = null;
 			});
+		}
 
+		//I wanted to call this OnHeartFailure...
+		private void OnHeartbeatElapsed()
+		{
+			BecomeCandidate();
 		}
 
 		public void Dispose()
