@@ -14,15 +14,16 @@ namespace NRaft.Tests.NodeTests
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly Node _node;
+		private readonly IClock _clock;
 
 		public OnAppendEntriesResponseTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = CurrentTerm;
-
+			_clock = Substitute.For<IClock>();
 			_connector = Substitute.For<IConnector>();
 
-			_node = new Node(_store, _connector, 10);
+			_node = new Node(_store, _clock, _connector, 10);
 			_node.BecomeLeader();
 		}
 

@@ -13,9 +13,10 @@ namespace NRaft.Tests.NodeTests
 		public void When_disposing_all_listeners_are_removed()
 		{
 			var store = new InMemoryStore();
+			var clock = Substitute.For<IClock>();
 			var connector = Substitute.For<IConnector>();
 
-			using (var node = new Node(store, connector, 1))
+			using (var node = new Node(store, clock, connector, 1))
 			{
 			}
 

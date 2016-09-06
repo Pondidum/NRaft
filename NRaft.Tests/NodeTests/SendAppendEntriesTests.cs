@@ -17,10 +17,12 @@ namespace NRaft.Tests.NodeTests
 		private readonly Node _node;
 		private readonly List<AppendEntriesRequest> _messages;
 		private readonly InMemoryStore _store;
+		private readonly IClock _clock;
 
 		public SendAppendEntriesTests()
 		{
 			_store = new InMemoryStore();
+			_clock = Substitute.For<IClock>();
 			_messages = new List<AppendEntriesRequest>();
 
 			_connector = Substitute.For<IConnector>();
@@ -28,7 +30,7 @@ namespace NRaft.Tests.NodeTests
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _messages.Add(cb.Arg<AppendEntriesRequest>()));
 
-			_node = new Node(_store,_connector, NodeID);
+			_node = new Node(_store, _clock, _connector, NodeID);
 		}
 
 		[Fact]

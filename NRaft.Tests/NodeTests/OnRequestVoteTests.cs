@@ -15,15 +15,17 @@ namespace NRaft.Tests.NodeTests
 		private readonly Node _node;
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
+		private readonly IClock _clock;
 
 		public OnRequestVoteTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = CurrentTerm;
 
+			_clock = Substitute.For<IClock>();
 			_connector = Substitute.For<IConnector>();
 
-			_node = new Node(_store, _connector, 10);
+			_node = new Node(_store, _clock, _connector, 10);
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },

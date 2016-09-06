@@ -28,8 +28,7 @@ namespace NRaft
 		private readonly HashSet<int> _votesResponded;
 		private readonly HashSet<int> _votesGranted;
 
-
-		public Node(IStore store, IConnector connector, int nodeID)
+		public Node(IStore store, IClock clock, IConnector connector, int nodeID)
 		{
 			_store = store;
 			_connector = connector;

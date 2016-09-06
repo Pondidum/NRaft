@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using NRaft.Infrastructure;
 using NRaft.Storage;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -15,8 +17,8 @@ namespace NRaft.Tests
 			var firstStore = new InMemoryStore();
 			var secondStore = new InMemoryStore();
 
-			var first = new Node(firstStore, dispatcher, 1);
-			var second = new Node(secondStore, dispatcher, 2);
+			var first = new Node(firstStore, Substitute.For<IClock>(), dispatcher, 1);
+			var second = new Node(secondStore, Substitute.For<IClock>(), dispatcher, 2);
 
 			first.AddNodeToCluster(2);
 			second.AddNodeToCluster(1);

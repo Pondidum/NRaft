@@ -13,6 +13,7 @@ namespace NRaft.Tests.NodeTests
 		private const int NodeID = 123;
 
 		private readonly InMemoryStore _store;
+		private readonly IClock _clock;
 		private readonly IConnector _connector;
 		private readonly Node _node;
 
@@ -23,12 +24,14 @@ namespace NRaft.Tests.NodeTests
 			_store = new InMemoryStore();
 			_store.CurrentTerm = 2;
 
+			_clock = Substitute.For<IClock>();
+
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.RequestVotes(Arg.Any<RequestVoteRequest>()))
 				.Do(cb => _response = cb.Arg<RequestVoteRequest>());
 
-			_node = new Node(_store, _connector, NodeID);
+			_node = new Node(_store, _clock, _connector, NodeID);
 
 			_node.OnRequestVoteResponse(new RequestVoteResponse
 			{

@@ -20,9 +20,10 @@ namespace NRaft.Tests.NodeTests
 			_store = new InMemoryStore();
 			_store.CurrentTerm = CurrentTerm - 1;
 
+			var clock = Substitute.For<IClock>();
 			var dispatcher = Substitute.For<IConnector>();
 
-			_node = new Node(_store, dispatcher, NodeID);
+			_node = new Node(_store, clock, dispatcher, NodeID);
 			_node.BecomeCandidate();
 		}
 

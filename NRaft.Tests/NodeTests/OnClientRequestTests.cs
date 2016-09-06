@@ -15,10 +15,10 @@ namespace NRaft.Tests.NodeTests
 		public OnClientRequestTests()
 		{
 			_store = new InMemoryStore();
-
+			var clock = Substitute.For<IClock>();
 			var dispatcher = Substitute.For<IConnector>();
 
-			_node = new Node(_store, dispatcher, 1234);
+			_node = new Node(_store, clock, dispatcher, 1234);
 		}
 
 		[Fact]

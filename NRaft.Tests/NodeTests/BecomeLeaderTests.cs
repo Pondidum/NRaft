@@ -18,18 +18,21 @@ namespace NRaft.Tests.NodeTests
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly Node _node;
+		private readonly IClock _clock;
 
 		public BecomeLeaderTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = 2;
 
+			_clock = Substitute.For<IClock>();
+
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _heartbeat = cb.Arg<AppendEntriesRequest>());
 
-			_node = new Node(_store, _connector, NodeID);
+			_node = new Node(_store, _clock, _connector, NodeID);
 
 			_node.BecomeCandidate();
 
