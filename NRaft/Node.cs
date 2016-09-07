@@ -10,6 +10,7 @@ namespace NRaft
 	public class Node : IDisposable
 	{
 		private readonly IStore _store;
+		private readonly IClock _clock;
 		private readonly IConnector _connector;
 		private readonly int _nodeID;
 
@@ -28,10 +29,12 @@ namespace NRaft
 		private readonly HashSet<int> _votesResponded;
 		private readonly HashSet<int> _votesGranted;
 		private readonly IPulseable _heart;
+		private IDisposable _election;
 
 		public Node(IStore store, IClock clock, IConnector connector, int nodeID)
 		{
 			_store = store;
+			_clock = clock;
 			_connector = connector;
 			_nodeID = nodeID;
 			_knownNodes = new HashSet<int>();
@@ -166,6 +169,8 @@ namespace NRaft
 				LastLogIndex = LastIndex(),
 				LastLogTerm = LastTerm()
 			});
+
+			_election = _clock.CreateTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
 		}
 
 		public void BecomeLeader()
@@ -346,6 +351,13 @@ namespace NRaft
 		private void OnHeartbeatElapsed()
 		{
 			BecomeCandidate();
+		}
+
+		private void OnElectionTimeout()
+		{
+			_election?.Dispose();
+
+			BecomeLeader();
 		}
 
 		public void Dispose()
