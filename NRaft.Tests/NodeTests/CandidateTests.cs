@@ -19,11 +19,12 @@ namespace NRaft.Tests.NodeTests
 		private Action _elapsed;
 		private readonly IClock _clock;
 		private readonly IStore _store;
+		private readonly IConnector _connector;
 
 		public CandidateTests()
 		{
 			_store = Substitute.For<IStore>();
-			var connector = Substitute.For<IConnector>();
+			_connector = Substitute.For<IConnector>();
 
 			_clock = Substitute.For<IClock>();
 			_heart = Substitute.For<IDisposable>();
@@ -33,7 +34,7 @@ namespace NRaft.Tests.NodeTests
 				.Returns(_heart)
 				.AndDoes(cb => _elapsed = cb.Arg<Action>());
 
-			_node = new Node(_store, _clock, connector, NodeID);
+			_node = new Node(_store, _clock, _connector, NodeID);
 			_node.AddNodeToCluster(OtherNodeID);
 		}
 
@@ -55,11 +56,13 @@ namespace NRaft.Tests.NodeTests
 		public void When_the_election_times_out_with_no_consensus()
 		{
 			_node.BecomeCandidate();
+			_connector.ClearReceivedCalls();
 
 			_elapsed();
 
 			_node.Role.ShouldBe(Types.Candidate);
 			_heart.Received().Dispose();
+			_connector.Received().RequestVotes(Arg.Any<RequestVoteRequest>());
 		}
 
 		[Fact]

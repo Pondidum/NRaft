@@ -358,6 +358,9 @@ namespace NRaft
 			_election?.Dispose();
 
 			BecomeLeader();
+
+			if (Role != Types.Leader)
+				BecomeCandidate();
 		}
 
 		public void Dispose()
