@@ -58,6 +58,7 @@
     <Compile Include="Messages\RequestVoteRequest.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Infrastructure\Timeout.cs" />
+    <Compile Include="States\States.cs" />
     <Compile Include="Storage\IFileSystem.cs" />
     <Compile Include="Storage\InMemoryStore.cs" />
     <Compile Include="Storage\IStore.cs" />
