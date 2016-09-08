@@ -19,7 +19,7 @@ namespace NRaft.States
 
 		public Candidate BecomeCandidate()
 		{
-			throw new NotImplementedException();
+			return new Candidate(_info);
 		}
 	}
 
@@ -34,12 +34,12 @@ namespace NRaft.States
 
 		public Follower BecomeFollower()
 		{
-			throw new NotImplementedException();
+			return new Follower(_info);
 		}
 
 		public Leader BecomeLeader()
 		{
-			throw new NotImplementedException();
+			return new Leader(_info);
 		}
 	}
 
@@ -54,7 +54,7 @@ namespace NRaft.States
 
 		public Follower BecomeFollower()
 		{
-			throw new NotImplementedException();
+			return new Follower(_info);
 		}
 	}
 }
