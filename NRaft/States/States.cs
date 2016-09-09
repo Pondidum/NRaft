@@ -8,7 +8,9 @@ namespace NRaft.States
 		
 	}
 
-	public class Follower
+	public class State { }
+
+	public class Follower : State
 	{
 		private readonly NodeInfo _info;
 
@@ -21,9 +23,10 @@ namespace NRaft.States
 		{
 			return new Candidate(_info);
 		}
+
 	}
 
-	public class Candidate
+	public class Candidate : State
 	{
 		private readonly NodeInfo _info;
 
@@ -43,7 +46,7 @@ namespace NRaft.States
 		}
 	}
 
-	public class Leader
+	public class Leader : State
 	{
 		private readonly NodeInfo _info;
 
