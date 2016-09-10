@@ -36,23 +36,13 @@ namespace NRaft.Tests
 			first.OnClientRequest("testing");
 			first.CommitIndex.ShouldBe(0);
 
-			first.AdvanceCommitIndex();
-			first.CommitIndex.ShouldBe(0);
-
 			first.SendAppendEntries();
-			first.AdvanceCommitIndex();
 
+			first.CommitIndex.ShouldBe(1);
 			firstStore.Log.Last().Command.ShouldBe("testing");
-			secondStore.Log.Last().Command.ShouldBe("testing");
-
-			second.CommitIndex.ShouldBe(0);
-
-			first.SendAppendEntries();
 
 			second.CommitIndex.ShouldBe(1);
-
-			first.AdvanceCommitIndex();
-			first.CommitIndex.ShouldBe(1);
+			secondStore.Log.Last().Command.ShouldBe("testing");
 		}
 	}
 }

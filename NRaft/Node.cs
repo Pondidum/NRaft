@@ -101,6 +101,8 @@ namespace NRaft
 			{
 				_nextIndex[message.FollowerID] = Math.Max(message.MatchIndex - 1, 1);
 			}
+
+			AdvanceCommitIndex();
 		}
 
 		public void OnRequestVote(RequestVoteRequest message)
