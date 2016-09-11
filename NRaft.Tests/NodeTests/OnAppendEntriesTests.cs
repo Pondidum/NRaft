@@ -56,6 +56,39 @@ namespace NRaft.Tests.NodeTests
 		}
 
 		[Fact]
+		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_higher_term()
+		{
+			_node.BecomeCandidate();
+			_node.BecomeLeader();
+
+			_node.OnAppendEntries(new AppendEntriesRequest
+			{
+				LeaderID = 20,
+				Term = _store.CurrentTerm + 10
+			});
+
+			_node.Role.ShouldBe(Types.Follower);
+		}
+
+		[Fact]
+		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_lower_term()
+		{
+			_node.BecomeCandidate();
+			_node.BecomeLeader();
+
+			var previousTerm = _store.CurrentTerm;
+
+			_node.OnAppendEntries(new AppendEntriesRequest
+			{
+				LeaderID = 20,
+				Term = _store.CurrentTerm - 5
+			});
+
+			_node.Role.ShouldBe(Types.Leader);
+			_store.CurrentTerm.ShouldBe(previousTerm);
+		}
+
+		[Fact]
 		public void When_a_messages_term_is_less_than_the_nodes()
 		{
 			var message = new AppendEntriesRequest
