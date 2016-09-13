@@ -4,7 +4,7 @@ namespace NRaft.Infrastructure
 {
 	public interface IClock
 	{
-		IDisposable CreateTimeout(TimeSpan duration, Action elapsed);
-		IPulseable CreatePulseMonitor(TimeSpan maxBetweenPulses, Action elapsed);
+		IDisposable CreateElectionTimeout(TimeSpan duration, Action elapsed);
+		IPulseable CreateHeartbeatTimeout(TimeSpan maxBetweenPulses, Action elapsed);
 	}
 }

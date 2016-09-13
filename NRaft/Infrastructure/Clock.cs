@@ -4,7 +4,7 @@ namespace NRaft.Infrastructure
 {
 	public class Clock : IClock
 	{
-		public IDisposable CreateTimeout(TimeSpan duration, Action elapsed)
+		public IDisposable CreateElectionTimeout(TimeSpan duration, Action elapsed)
 		{
 			return new Timeout(elapsed)
 			{
@@ -12,7 +12,7 @@ namespace NRaft.Infrastructure
 			};
 		}
 
-		public IPulseable CreatePulseMonitor(TimeSpan maxBetweenPulses, Action elapsed)
+		public IPulseable CreateHeartbeatTimeout(TimeSpan maxBetweenPulses, Action elapsed)
 		{
 			return new Timeout(elapsed)
 			{

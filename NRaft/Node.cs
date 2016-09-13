@@ -57,7 +57,7 @@ namespace NRaft
 			_connector.Register(_nodeID, OnRequestVote);
 			_connector.Register(_nodeID, OnRequestVoteResponse);
 
-			_heart = clock.CreatePulseMonitor(TimeSpan.FromMilliseconds(350), OnHeartbeatElapsed); //should be random...
+			_heart = clock.CreateHeartbeatTimeout(TimeSpan.FromMilliseconds(350), OnHeartbeatElapsed); //should be random...
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;
@@ -172,7 +172,7 @@ namespace NRaft
 				LastLogTerm = LastTerm()
 			});
 
-			_election = _clock.CreateTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
+			_election = _clock.CreateElectionTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
 		}
 
 		public void BecomeLeader()

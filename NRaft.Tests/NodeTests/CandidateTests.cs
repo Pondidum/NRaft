@@ -30,7 +30,7 @@ namespace NRaft.Tests.NodeTests
 			_heart = Substitute.For<IDisposable>();
 
 			_clock
-				.CreateTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>())
+				.CreateElectionTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>())
 				.Returns(_heart)
 				.AndDoes(cb => _elapsed = cb.Arg<Action>());
 
@@ -41,7 +41,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void The_timeout_isnt_started_if_the_node_doesnt_become_a_candidate()
 		{
-			_clock.DidNotReceive().CreateTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>());
+			_clock.DidNotReceive().CreateElectionTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>());
 		}
 
 		[Fact]
@@ -49,7 +49,7 @@ namespace NRaft.Tests.NodeTests
 		{
 			_node.BecomeCandidate();
 
-			_clock.Received().CreateTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>());
+			_clock.Received().CreateElectionTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>());
 		}
 
 		[Fact]

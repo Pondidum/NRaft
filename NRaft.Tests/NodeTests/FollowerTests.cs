@@ -24,7 +24,7 @@ namespace NRaft.Tests.NodeTests
 			_heart = Substitute.For<IPulseable>();
 
 			clock
-				.CreatePulseMonitor(Arg.Any<TimeSpan>(), Arg.Any<Action>())
+				.CreateHeartbeatTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>())
 				.Returns(_heart)
 				.AndDoes(cb => _elapsed = cb.Arg<Action>());
 
