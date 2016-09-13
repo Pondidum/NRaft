@@ -2,6 +2,7 @@
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
+using NRaft.Tests.TestInfrastructure;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -17,14 +18,14 @@ namespace NRaft.Tests.NodeTests
 		private readonly Node _node;
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
-		private readonly IClock _clock;
+		private readonly ControllableClock _clock;
 
 		public OnAppendEntriesTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = CurrentTerm;
 
-			_clock = Substitute.For<IClock>();
+			_clock = new ControllableClock();
 
 			_connector = Substitute.For<IConnector>();
 			_connector
@@ -59,7 +60,7 @@ namespace NRaft.Tests.NodeTests
 		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_higher_term()
 		{
 			_node.BecomeCandidate();
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			_node.OnAppendEntries(new AppendEntriesRequest
 			{
@@ -74,7 +75,7 @@ namespace NRaft.Tests.NodeTests
 		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_lower_term()
 		{
 			_node.BecomeCandidate();
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			var previousTerm = _store.CurrentTerm;
 

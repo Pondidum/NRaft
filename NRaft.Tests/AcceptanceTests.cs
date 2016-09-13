@@ -18,8 +18,11 @@ namespace NRaft.Tests
 			var firstStore = new InMemoryStore();
 			var secondStore = new InMemoryStore();
 
-			var first = new Node(firstStore, Substitute.For<IClock>(), dispatcher, 1);
-			var second = new Node(secondStore, Substitute.For<IClock>(), dispatcher, 2);
+			var firstClock = new ControllableClock();
+			var secondClock = new ControllableClock();
+
+			var first = new Node(firstStore, firstClock, dispatcher, 1);
+			var second = new Node(secondStore, secondClock, dispatcher, 2);
 
 			first.AddNodeToCluster(2);
 			second.AddNodeToCluster(1);
@@ -31,7 +34,7 @@ namespace NRaft.Tests
 
 			//election timeout elapses...
 
-			first.BecomeLeader();
+			firstClock.EndCurrentElection();
 			first.Role.ShouldBe(Types.Leader);
 
 			first.OnClientRequest("testing");

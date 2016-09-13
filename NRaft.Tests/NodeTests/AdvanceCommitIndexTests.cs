@@ -2,6 +2,7 @@
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
+using NRaft.Tests.TestInfrastructure;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -15,17 +16,17 @@ namespace NRaft.Tests.NodeTests
 		private readonly IConnector _connector;
 		private readonly Node _node;
 		private readonly InMemoryStore _store;
-		private readonly IClock _clock;
+		private readonly ControllableClock _clock;
 
 		public AdvanceCommitIndexTests()
 		{
 			_store = new InMemoryStore();
-			_clock = Substitute.For<IClock>();
+			_clock = new ControllableClock();
 			_connector = Substitute.For<IConnector>();
 
 			_node = new Node(_store, _clock, _connector, NodeID);
 			_node.BecomeCandidate();
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			//create committed log
 			_store.Log = new[] {

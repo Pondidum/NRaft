@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Storage;
+using NRaft.Tests.TestInfrastructure;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -11,14 +12,15 @@ namespace NRaft.Tests.NodeTests
 	{
 		private readonly InMemoryStore _store;
 		private readonly Node _node;
+		private readonly ControllableClock _clock;
 
 		public OnClientRequestTests()
 		{
 			_store = new InMemoryStore();
-			var clock = Substitute.For<IClock>();
+			_clock = new ControllableClock();
 			var dispatcher = Substitute.For<IConnector>();
 
-			_node = new Node(_store, clock, dispatcher, 1234);
+			_node = new Node(_store, _clock, dispatcher, 1234);
 		}
 
 		[Fact]
@@ -35,7 +37,7 @@ namespace NRaft.Tests.NodeTests
 			var value = new Dto { Value = "abc" };
 
 			_node.BecomeCandidate();
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			_node.OnClientRequest(value);
 

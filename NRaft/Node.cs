@@ -175,7 +175,7 @@ namespace NRaft
 			_election = _clock.CreateElectionTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
 		}
 
-		public void BecomeLeader()
+		private void BecomeLeader()
 		{
 			if (Role != Types.Candidate)
 				return;
