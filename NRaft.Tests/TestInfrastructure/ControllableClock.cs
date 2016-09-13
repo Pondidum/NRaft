@@ -5,33 +5,20 @@ namespace NRaft.Tests.TestInfrastructure
 {
 	public class ControllableClock : IClock
 	{
-		private Action<ElectionTimer> _onElectionTimerCreated;
-		private Action<HeartbeatTimer> _onHeartbeatTimerCreated;
+		private ElectionTimer _lastElectionTimerCreated;
+		private HeartbeatTimer _lastHeartbeatTimerCreated;
 
-		public void OnElectionTimeoutCreated(Action<ElectionTimer> callback)
-		{
-			_onElectionTimerCreated = callback;
-		}
-
-		public void OnHeartbeatTimeoutCreated(Action<HeartbeatTimer> callback)
-		{
-			_onHeartbeatTimerCreated = callback;
-		}
+		public void EndCurrentElection() => _lastElectionTimerCreated.Expire();
+		public void EndCurrentHeartbeat() => _lastHeartbeatTimerCreated.Expire();
 
 		public IDisposable CreateElectionTimeout(TimeSpan duration, Action elapsed)
 		{
-			var timer = new ElectionTimer(duration, elapsed);
-			_onElectionTimerCreated?.Invoke(timer);
-
-			return timer;
+			return _lastElectionTimerCreated = new ElectionTimer(duration, elapsed);
 		}
 
 		public IPulseable CreateHeartbeatTimeout(TimeSpan maxBetweenPulses, Action elapsed)
 		{
-			var timer = new HeartbeatTimer(maxBetweenPulses, elapsed);
-			_onHeartbeatTimerCreated?.Invoke(timer);
-
-			return timer;
+			return _lastHeartbeatTimerCreated = new HeartbeatTimer(maxBetweenPulses, elapsed);
 		}
 	}
 }

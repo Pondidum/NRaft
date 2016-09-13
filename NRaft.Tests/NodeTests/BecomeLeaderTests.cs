@@ -3,6 +3,7 @@ using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
+using NRaft.Tests.TestInfrastructure;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -18,14 +19,14 @@ namespace NRaft.Tests.NodeTests
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly Node _node;
-		private readonly IClock _clock;
+		private readonly ControllableClock _clock;
 
 		public BecomeLeaderTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = 2;
 
-			_clock = Substitute.For<IClock>();
+			_clock = new ControllableClock();
 
 			_connector = Substitute.For<IConnector>();
 			_connector
@@ -57,9 +58,10 @@ namespace NRaft.Tests.NodeTests
 		public void If_the_node_is_not_a_candidate()
 		{
 			_node.BecomeFollower();
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
-			_node.Role.ShouldBe(Types.Follower);
+			//when an election fails, we start a new one, thus becoming a candidate instead of a follower
+			_node.Role.ShouldBe(Types.Candidate);
 		}
 
 		[Fact]
@@ -67,7 +69,7 @@ namespace NRaft.Tests.NodeTests
 		{
 			_node.ResetVotes();
 
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			_node.Role.ShouldBe(Types.Candidate);
 		}
@@ -75,14 +77,14 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void The_role_changes()
 		{
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 			_node.Role.ShouldBe(Types.Leader);
 		}
 
 		[Fact]
 		public void The_next_index_for_every_other_client_is_set_to_last_log_index()
 		{
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			var nextLogIndex = _store.Log.Last().Index + 1;
 
@@ -97,7 +99,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void The_match_index_for_every_other_client_is_set_to_zero()
 		{
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			var outcomes = _node
 				.KnownNodes
@@ -110,7 +112,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void It_sends_append_entries_to_all()
 		{
-			_node.BecomeLeader();
+			_clock.EndCurrentElection();
 
 			var index = _node.NextIndexFor(_heartbeat.RecipientID) - 1;
 
