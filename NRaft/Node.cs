@@ -144,37 +144,6 @@ namespace NRaft
 			Role = Types.Follower;
 		}
 
-		private void BecomeCandidate()
-		{
-			Role = Types.Candidate;
-
-			_votesResponded.Clear();
-			_votesGranted.Clear();
-
-			_store.Write(write =>
-			{
-				write.CurrentTerm = _store.CurrentTerm + 1;
-				write.VotedFor = _nodeID;
-			});
-
-			OnRequestVoteResponse(new RequestVoteResponse
-			{
-				GranterID = _nodeID,
-				Term = _store.CurrentTerm,
-				VoteGranted = true
-			});
-
-			_connector.RequestVotes(new RequestVoteRequest
-			{
-				CandidateID = _nodeID,
-				Term = _store.CurrentTerm,
-				LastLogIndex = LastIndex(),
-				LastLogTerm = LastTerm()
-			});
-
-			_election = _clock.CreateElectionTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
-		}
-
 		public void SendAppendEntries()
 		{
 			foreach (var nodeID in KnownNodes)
@@ -342,6 +311,37 @@ namespace NRaft
 
 			if (Role != Types.Leader)
 				BecomeCandidate();
+		}
+
+		private void BecomeCandidate()
+		{
+			Role = Types.Candidate;
+
+			_votesResponded.Clear();
+			_votesGranted.Clear();
+
+			_store.Write(write =>
+			{
+				write.CurrentTerm = _store.CurrentTerm + 1;
+				write.VotedFor = _nodeID;
+			});
+
+			OnRequestVoteResponse(new RequestVoteResponse
+			{
+				GranterID = _nodeID,
+				Term = _store.CurrentTerm,
+				VoteGranted = true
+			});
+
+			_connector.RequestVotes(new RequestVoteRequest
+			{
+				CandidateID = _nodeID,
+				Term = _store.CurrentTerm,
+				LastLogIndex = LastIndex(),
+				LastLogTerm = LastTerm()
+			});
+
+			_election = _clock.CreateElectionTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
 		}
 
 		private void BecomeLeader()
