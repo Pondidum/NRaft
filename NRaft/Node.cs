@@ -175,27 +175,6 @@ namespace NRaft
 			_election = _clock.CreateElectionTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
 		}
 
-		private void BecomeLeader()
-		{
-			if (Role != Types.Candidate)
-				return;
-
-			if (_quorum.Any(q => q.IsSubsetOf(_votesGranted)) == false)
-				return;
-
-			Role = Types.Leader;
-
-			var last = LastIndex() + 1;
-
-			foreach (var nodeID in KnownNodes)
-				_nextIndex[nodeID] = last;
-
-			foreach (var nodeID in KnownNodes)
-				_matchIndex[nodeID] = 0;
-
-			SendAppendEntries();
-		}
-
 		public void SendAppendEntries()
 		{
 			foreach (var nodeID in KnownNodes)
@@ -363,6 +342,27 @@ namespace NRaft
 
 			if (Role != Types.Leader)
 				BecomeCandidate();
+		}
+
+		private void BecomeLeader()
+		{
+			if (Role != Types.Candidate)
+				return;
+
+			if (_quorum.Any(q => q.IsSubsetOf(_votesGranted)) == false)
+				return;
+
+			Role = Types.Leader;
+
+			var last = LastIndex() + 1;
+
+			foreach (var nodeID in KnownNodes)
+				_nextIndex[nodeID] = last;
+
+			foreach (var nodeID in KnownNodes)
+				_matchIndex[nodeID] = 0;
+
+			SendAppendEntries();
 		}
 
 		public void Dispose()
