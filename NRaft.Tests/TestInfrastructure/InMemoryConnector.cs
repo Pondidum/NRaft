@@ -4,7 +4,7 @@ using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
 
-namespace NRaft.Tests
+namespace NRaft.Tests.TestInfrastructure
 {
 	public class InMemoryConnector : IConnector
 	{

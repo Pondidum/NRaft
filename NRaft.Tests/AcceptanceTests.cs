@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Storage;
+using NRaft.Tests.TestInfrastructure;
 using NSubstitute;
 using Shouldly;
 using Xunit;

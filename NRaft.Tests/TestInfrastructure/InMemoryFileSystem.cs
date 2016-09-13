@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using NRaft.Storage;
 
-namespace NRaft.Tests
+namespace NRaft.Tests.TestInfrastructure
 {
 	public class InMemoryFileSystem : IFileSystem
 	{

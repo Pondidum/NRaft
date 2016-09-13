@@ -70,8 +70,8 @@
   <ItemGroup>
     <Compile Include="AcceptanceTests.cs" />
     <Compile Include="Infrastructure\QuorumTests.cs" />
-    <Compile Include="InMemoryConnector.cs" />
-    <Compile Include="InMemoryFileSystem.cs" />
+    <Compile Include="TestInfrastructure\InMemoryConnector.cs" />
+    <Compile Include="TestInfrastructure\InMemoryFileSystem.cs" />
     <Compile Include="NodeTests\CandidateTests.cs" />
     <Compile Include="NodeTests\FollowerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
