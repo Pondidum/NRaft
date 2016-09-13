@@ -36,7 +36,7 @@ namespace NRaft.Tests.NodeTests
 		{
 			var value = new Dto { Value = "abc" };
 
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 			_clock.EndCurrentElection();
 
 			_node.OnClientRequest(value);

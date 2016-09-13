@@ -2,6 +2,7 @@
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
+using NRaft.Tests.TestInfrastructure;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -13,7 +14,7 @@ namespace NRaft.Tests.NodeTests
 		private const int NodeID = 123;
 
 		private readonly InMemoryStore _store;
-		private readonly IClock _clock;
+		private readonly ControllableClock _clock;
 		private readonly IConnector _connector;
 		private readonly Node _node;
 
@@ -24,7 +25,7 @@ namespace NRaft.Tests.NodeTests
 			_store = new InMemoryStore();
 			_store.CurrentTerm = 2;
 
-			_clock = Substitute.For<IClock>();
+			_clock = new ControllableClock();
 
 			_connector = Substitute.For<IConnector>();
 			_connector
@@ -49,7 +50,7 @@ namespace NRaft.Tests.NodeTests
 				new LogEntry { Index = 5, Term = 2 }
 			};
 
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 		}
 
 		[Fact]

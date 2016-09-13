@@ -144,7 +144,7 @@ namespace NRaft
 			Role = Types.Follower;
 		}
 
-		public void BecomeCandidate()
+		private void BecomeCandidate()
 		{
 			Role = Types.Candidate;
 

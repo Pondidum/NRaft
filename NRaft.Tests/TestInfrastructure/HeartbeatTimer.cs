@@ -10,6 +10,7 @@ namespace NRaft.Tests.TestInfrastructure
 		public TimeSpan MaxBetweenPulses { get; }
 		public Action OnPulsed { get; set; }
 		public Action OnDispose { get; set; }
+		public bool WasDisposed { get; private set; }
 
 		public HeartbeatTimer(TimeSpan maxBetweenPulses, Action elapsed)
 		{
@@ -26,6 +27,7 @@ namespace NRaft.Tests.TestInfrastructure
 
 		public void Dispose()
 		{
+			WasDisposed = true;
 			OnDispose?.Invoke();
 		}
 	}

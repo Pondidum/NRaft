@@ -59,7 +59,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_higher_term()
 		{
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 			_clock.EndCurrentElection();
 
 			_node.OnAppendEntries(new AppendEntriesRequest
@@ -74,7 +74,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_lower_term()
 		{
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 			_clock.EndCurrentElection();
 
 			var previousTerm = _store.CurrentTerm;
@@ -244,7 +244,7 @@ namespace NRaft.Tests.NodeTests
 		public void When_the_node_is_a_candidate_and_the_terms_are_equal()
 		{
 			_store.CurrentTerm = _store.CurrentTerm - 1;
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 
 			_node.OnAppendEntries(new AppendEntriesRequest
 			{

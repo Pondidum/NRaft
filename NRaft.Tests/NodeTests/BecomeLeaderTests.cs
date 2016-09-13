@@ -35,7 +35,7 @@ namespace NRaft.Tests.NodeTests
 
 			_node = new Node(_store, _clock, _connector, NodeID);
 
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },

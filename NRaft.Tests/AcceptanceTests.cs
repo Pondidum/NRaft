@@ -27,7 +27,7 @@ namespace NRaft.Tests
 			first.AddNodeToCluster(2);
 			second.AddNodeToCluster(1);
 
-			first.BecomeCandidate();
+			firstClock.EndCurrentHeartbeat();
 
 			first.VotesGranted.ShouldBe(new[] { 1, 2 });
 			first.VotesResponded.ShouldBe(new[] { 1, 2 });

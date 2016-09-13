@@ -8,6 +8,7 @@ namespace NRaft.Tests.TestInfrastructure
 
 		public TimeSpan Duration { get; }
 		public Action OnDispose { get; set; }
+		public bool WasDisposed { get; private set; }
 
 		public ElectionTimer(TimeSpan duration, Action elapsed)
 		{
@@ -19,6 +20,7 @@ namespace NRaft.Tests.TestInfrastructure
 
 		public void Dispose()
 		{
+			WasDisposed = true;
 			OnDispose?.Invoke();
 		}
 	}

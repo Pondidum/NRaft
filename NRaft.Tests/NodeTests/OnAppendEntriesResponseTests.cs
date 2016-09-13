@@ -23,7 +23,7 @@ namespace NRaft.Tests.NodeTests
 			_connector = Substitute.For<IConnector>();
 
 			_node = new Node(_store, _clock, _connector, 10);
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 			_clock.EndCurrentElection();
 		}
 

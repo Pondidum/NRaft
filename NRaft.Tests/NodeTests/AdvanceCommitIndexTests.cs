@@ -25,7 +25,7 @@ namespace NRaft.Tests.NodeTests
 			_connector = Substitute.For<IConnector>();
 
 			_node = new Node(_store, _clock, _connector, NodeID);
-			_node.BecomeCandidate();
+			_clock.EndCurrentHeartbeat();
 			_clock.EndCurrentElection();
 
 			//create committed log
