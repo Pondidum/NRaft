@@ -57,7 +57,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void If_the_node_is_not_a_candidate()
 		{
-			_node.BecomeFollower();
+			_node.OnAppendEntries(new AppendEntriesRequest { Term = _store.CurrentTerm + 1 });
 			_clock.EndCurrentElection();
 
 			//when an election fails, we start a new one, thus becoming a candidate instead of a follower

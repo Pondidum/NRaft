@@ -139,7 +139,7 @@ namespace NRaft
 			_votesGranted.Clear();
 		}
 
-		public void BecomeFollower()
+		private void BecomeFollower()
 		{
 			Role = Types.Follower;
 		}

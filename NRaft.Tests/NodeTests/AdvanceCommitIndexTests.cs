@@ -42,7 +42,11 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_not_a_leader()
 		{
-			_node.BecomeFollower();
+			_node.OnAppendEntries(new AppendEntriesRequest
+			{
+				Term = _store.CurrentTerm + 1,
+				LeaderCommit = _node.CommitIndex
+			});
 
 			_node.AdvanceCommitIndex();
 
