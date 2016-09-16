@@ -16,7 +16,7 @@ namespace NRaft.Tests.TestInfrastructure
 			return LastElectionTimer = new ElectionTimer(duration, elapsed);
 		}
 
-		public IPulseable CreateHeartbeatTimeout(TimeSpan maxBetweenPulses, Action elapsed)
+		public IPulseable CreatePulseTimeout(TimeSpan maxBetweenPulses, Action elapsed)
 		{
 			return LastHeartbeatTimer = new HeartbeatTimer(maxBetweenPulses, elapsed);
 		}

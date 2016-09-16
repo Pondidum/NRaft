@@ -57,7 +57,7 @@ namespace NRaft
 			_connector.Register(_nodeID, OnRequestVote);
 			_connector.Register(_nodeID, OnRequestVoteResponse);
 
-			_heart = clock.CreateHeartbeatTimeout(TimeSpan.FromMilliseconds(350), OnHeartbeatElapsed); //should be random...
+			_heart = clock.CreatePulseTimeout(TimeSpan.FromMilliseconds(350), OnHeartbeatElapsed); //should be random...
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;

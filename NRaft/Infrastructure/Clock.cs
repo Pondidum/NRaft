@@ -12,7 +12,7 @@ namespace NRaft.Infrastructure
 			};
 		}
 
-		public IPulseable CreateHeartbeatTimeout(TimeSpan maxBetweenPulses, Action elapsed)
+		public IPulseable CreatePulseTimeout(TimeSpan maxBetweenPulses, Action elapsed)
 		{
 			return new Timeout(elapsed)
 			{
