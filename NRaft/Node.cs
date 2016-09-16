@@ -30,6 +30,7 @@ namespace NRaft
 		private readonly HashSet<int> _votesGranted;
 		private IPulseable _pulseMonitor;
 		private IDisposable _election;
+		private IDisposable _heartbeat;
 
 		public Node(IStore store, IClock clock, IConnector connector, int nodeID)
 		{
@@ -56,8 +57,6 @@ namespace NRaft
 			_connector.Register(_nodeID, OnAppendEntriesResponse);
 			_connector.Register(_nodeID, OnRequestVote);
 			_connector.Register(_nodeID, OnRequestVoteResponse);
-
-			_heart = clock.CreatePulseTimeout(TimeSpan.FromMilliseconds(350), OnHeartbeatElapsed); //should be random...
 		}
 
 		public IEnumerable<int> KnownNodes => _knownNodes;
@@ -142,6 +141,9 @@ namespace NRaft
 		private void BecomeFollower()
 		{
 			Role = Types.Follower;
+
+			_heartbeat?.Dispose();
+			_pulseMonitor = _clock.CreatePulseTimeout(Timeouts.GetMaxPulseInterval(), OnHeartbeatElapsed); //should be random...
 		}
 
 		public void SendAppendEntries()
@@ -315,6 +317,9 @@ namespace NRaft
 
 		private void BecomeCandidate()
 		{
+			_heartbeat?.Dispose();
+			_pulseMonitor.Dispose();
+
 			Role = Types.Candidate;
 
 			_votesResponded.Clear();
@@ -341,11 +346,13 @@ namespace NRaft
 				LastLogTerm = LastTerm()
 			});
 
-			_election = _clock.CreateElectionTimeout(TimeSpan.FromMilliseconds(500), OnElectionTimeout); //or whatever the electiontimeout is
+			_election = _clock.CreateElectionTimeout(Timeouts.GetElectionTimeout(), OnElectionTimeout); //or whatever the electiontimeout is
 		}
 
 		private void BecomeLeader()
 		{
+			_pulseMonitor.Dispose();
+
 			if (Role != Types.Candidate)
 				return;
 
@@ -363,6 +370,7 @@ namespace NRaft
 				_matchIndex[nodeID] = 0;
 
 			SendAppendEntries();
+			_heartbeat = _clock.CreateHeartbeat(Timeouts.GetHeartRate(), SendAppendEntries);
 		}
 
 		public void Dispose()
