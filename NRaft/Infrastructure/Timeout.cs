@@ -9,21 +9,21 @@ namespace NRaft.Infrastructure
 		private DateTime _pulsedAt;
 		private Task _task;
 
+		private readonly TimeSpan _duration;
 		private readonly Action _onTimeout;
 		private readonly CancellationTokenSource _background;
 
-		public Timeout(Action onTimeout)
+		public Timeout(TimeSpan duration, Action onTimeout)
 		{
+			_duration = duration;
 			_onTimeout = onTimeout;
 			_background = new CancellationTokenSource();
 
 			GetTimestamp = () => DateTime.UtcNow;
-			Duration = TimeSpan.FromMilliseconds(350);
 			CheckInterval = TimeSpan.FromMilliseconds(50);
 		}
 
 		public Func<DateTime> GetTimestamp { get; set; }
-		public TimeSpan Duration { get; set; }
 		public TimeSpan CheckInterval { get; set; }
 
 		public void Start()
@@ -32,7 +32,7 @@ namespace NRaft.Infrastructure
 
 			_task = Task.Run(() =>
 			{
-				while (GetTimestamp().Subtract(_pulsedAt) < Duration && _background.IsCancellationRequested == false)
+				while (GetTimestamp().Subtract(_pulsedAt) < _duration && _background.IsCancellationRequested == false)
 				{
 					Task
 						.Delay(CheckInterval, _background.Token)
