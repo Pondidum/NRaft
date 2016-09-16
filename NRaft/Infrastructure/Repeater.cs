@@ -26,6 +26,7 @@ namespace NRaft.Infrastructure
 		public void Dispose()
 		{
 			_source.Cancel();
+			_source.Dispose();
 			_task.Dispose();
 		}
 	}
