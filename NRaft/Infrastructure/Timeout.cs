@@ -7,11 +7,11 @@ namespace NRaft.Infrastructure
 	public class Timeout : IPulseable
 	{
 		private DateTime _pulsedAt;
-		private Task _task;
 
 		private readonly TimeSpan _duration;
 		private readonly Action _onTimeout;
 		private readonly CancellationTokenSource _background;
+		private readonly Task _task;
 
 		public Timeout(TimeSpan duration, Action onTimeout)
 		{
@@ -21,13 +21,7 @@ namespace NRaft.Infrastructure
 
 			GetTimestamp = () => DateTime.UtcNow;
 			CheckInterval = TimeSpan.FromMilliseconds(50);
-		}
 
-		public Func<DateTime> GetTimestamp { get; set; }
-		public TimeSpan CheckInterval { get; set; }
-
-		public void Start()
-		{
 			_pulsedAt = GetTimestamp();
 
 			_task = Task.Run(() =>
@@ -43,7 +37,11 @@ namespace NRaft.Infrastructure
 					_onTimeout();
 
 			}, _background.Token);
+
 		}
+
+		public Func<DateTime> GetTimestamp { get; set; }
+		public TimeSpan CheckInterval { get; set; }
 
 		public void Pulse()
 		{
