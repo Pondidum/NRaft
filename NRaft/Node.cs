@@ -28,7 +28,7 @@ namespace NRaft
 		//candidate0only state - perhaps subclass or extract
 		private readonly HashSet<int> _votesResponded;
 		private readonly HashSet<int> _votesGranted;
-		private readonly IPulseable _heart;
+		private IPulseable _pulseMonitor;
 		private IDisposable _election;
 
 		public Node(IStore store, IClock clock, IConnector connector, int nodeID)
@@ -69,7 +69,7 @@ namespace NRaft
 
 		public void OnAppendEntries(AppendEntriesRequest message)
 		{
-			_heart.Pulse();
+			_pulseMonitor.Pulse();
 
 			UpdateTerm(message.Term);
 
