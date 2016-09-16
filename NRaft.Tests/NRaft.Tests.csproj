@@ -72,6 +72,7 @@
     <Compile Include="TestInfrastructure\ControllableClock.cs" />
     <Compile Include="Infrastructure\QuorumTests.cs" />
     <Compile Include="TestInfrastructure\ElectionTimer.cs" />
+    <Compile Include="TestInfrastructure\HeartbeatRepeater.cs" />
     <Compile Include="TestInfrastructure\HeartbeatTimer.cs" />
     <Compile Include="TestInfrastructure\InMemoryConnector.cs" />
     <Compile Include="TestInfrastructure\InMemoryFileSystem.cs" />

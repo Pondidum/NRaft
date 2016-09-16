@@ -19,5 +19,10 @@ namespace NRaft.Infrastructure
 				Duration = maxBetweenPulses
 			};
 		}
+
+		public IDisposable CreateHeartbeat(TimeSpan interval, Action elapsed)
+		{
+			return new Repeater(interval, elapsed);
+		}
 	}
 }

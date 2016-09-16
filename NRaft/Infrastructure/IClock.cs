@@ -6,5 +6,6 @@ namespace NRaft.Infrastructure
 	{
 		IDisposable CreateElectionTimeout(TimeSpan duration, Action elapsed);
 		IPulseable CreatePulseTimeout(TimeSpan maxBetweenPulses, Action elapsed);
+		IDisposable CreateHeartbeat(TimeSpan interval, Action elapsed);
 	}
 }

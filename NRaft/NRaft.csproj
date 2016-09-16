@@ -48,6 +48,7 @@
     <Compile Include="Infrastructure\IClock.cs" />
     <Compile Include="Infrastructure\IPulseable.cs" />
     <Compile Include="Infrastructure\LoggingConnector.cs" />
+    <Compile Include="Infrastructure\Repeater.cs" />
     <Compile Include="Messages\AppendEntriesResponse.cs" />
     <Compile Include="Messages\AppendEntriesRequest.cs" />
     <Compile Include="Infrastructure\IConnector.cs" />

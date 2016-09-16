@@ -20,5 +20,10 @@ namespace NRaft.Tests.TestInfrastructure
 		{
 			return LastHeartbeatTimer = new HeartbeatTimer(maxBetweenPulses, elapsed);
 		}
+
+		public IDisposable CreateHeartbeat(TimeSpan interval, Action elapsed)
+		{
+			return new HeartbeatRepeater(interval, elapsed);
+		}
 	}
 }
