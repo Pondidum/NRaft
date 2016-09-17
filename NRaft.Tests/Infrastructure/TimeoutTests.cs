@@ -62,5 +62,18 @@ namespace NRaft.Tests.Infrastructure
 			reset.WaitOne(TimeSpan.FromMilliseconds(100));
 			triggered.ShouldBe(true);
 		}
+
+		[Fact]
+		public void When_a_timeout_is_disposed_multiple_times()
+		{
+			var expired = false;
+			var timeout = new Timeout(TimeSpan.FromSeconds(10), () => expired = true);
+
+			timeout.Dispose();
+			expired.ShouldBe(false);
+
+			Should.NotThrow(() => timeout.Dispose());
+			expired.ShouldBe(false);
+		}
 	}
 }

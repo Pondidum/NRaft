@@ -7,6 +7,7 @@ namespace NRaft.Infrastructure
 	public class Timeout : IPulseable
 	{
 		private DateTime _pulsedAt;
+		private bool _disposed;
 
 		private readonly TimeSpan _duration;
 		private readonly Action _onTimeout;
@@ -53,9 +54,21 @@ namespace NRaft.Infrastructure
 
 		public void Dispose()
 		{
-			_background.Cancel();
-			_background.Dispose();
-			_task.Dispose();
+			if (_disposed)
+				return;
+
+			_disposed = true;
+
+			try
+			{
+				_background.Cancel();
+				_background.Dispose();
+				_task.Wait();
+				_task.Dispose();
+			}
+			catch (AggregateException)
+			{
+			}
 		}
 	}
 }
