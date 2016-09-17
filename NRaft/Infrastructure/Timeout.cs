@@ -32,12 +32,15 @@ namespace NRaft.Infrastructure
 						.Delay(CheckInterval, _background.Token)
 						.Wait(_background.Token);
 				}
-
-				if (_background.IsCancellationRequested == false)
-					_onTimeout();
-
 			}, _background.Token);
 
+			_task.ContinueWith(t =>
+			{
+				if (t.IsCanceled)
+					return;
+
+				_onTimeout();
+			});
 		}
 
 		public Func<DateTime> GetTimestamp { get; set; }

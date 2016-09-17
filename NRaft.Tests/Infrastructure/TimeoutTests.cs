@@ -17,8 +17,8 @@ namespace NRaft.Tests.Infrastructure
 
 			var timeout = new Timeout(TimeSpan.FromMilliseconds(100), () =>
 			{
-				reset.Set();
 				triggered = true;
+				reset.Set();
 			});
 
 			reset.WaitOne(TimeSpan.FromMilliseconds(200));
@@ -33,8 +33,8 @@ namespace NRaft.Tests.Infrastructure
 
 			var timeout = new Timeout(TimeSpan.FromMilliseconds(100), () =>
 			{
-				reset.Set();
 				triggered = true;
+				reset.Set();
 			});
 
 			Task.Delay(TimeSpan.FromMilliseconds(80)).ContinueWith(t => timeout.Pulse());
@@ -42,6 +42,25 @@ namespace NRaft.Tests.Infrastructure
 
 			reset.WaitOne(TimeSpan.FromMilliseconds(200));
 			triggered.ShouldBe(false);
+		}
+
+		[Fact]
+		public void When_a_timeout_is_disposed_in_its_timeout()
+		{
+			var triggered = false;
+			var reset = new AutoResetEvent(false);
+
+			Timeout timeout = null;
+
+			timeout = new Timeout(TimeSpan.FromMilliseconds(50), () =>
+			{
+				timeout.Dispose();
+				triggered = true;
+				reset.Set();
+			});
+
+			reset.WaitOne(TimeSpan.FromMilliseconds(100));
+			triggered.ShouldBe(true);
 		}
 	}
 }
