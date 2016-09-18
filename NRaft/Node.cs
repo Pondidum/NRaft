@@ -106,6 +106,8 @@ namespace NRaft
 
 		public void OnRequestVote(RequestVoteRequest message)
 		{
+			_pulseMonitor.Pulse();
+
 			UpdateTerm(message.Term);
 
 			var voteGranted = RequestVote(message);
@@ -143,6 +145,7 @@ namespace NRaft
 			Role = Types.Follower;
 
 			_heartbeat?.Dispose();
+			_pulseMonitor?.Dispose();
 			_pulseMonitor = _clock.CreatePulseTimeout(Timeouts.GetMaxPulseInterval(), OnHeartbeatElapsed); //should be random...
 		}
 
