@@ -4,11 +4,14 @@ using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
+using Serilog;
 
 namespace NRaft
 {
 	public class Node : IDisposable
 	{
+		private static readonly ILogger Log = Serilog.Log.ForContext<Node>();
+
 		private readonly IStore _store;
 		private readonly IClock _clock;
 		private readonly IConnector _connector;
@@ -68,6 +71,8 @@ namespace NRaft
 
 		public void OnAppendEntries(AppendEntriesRequest message)
 		{
+			Log.Debug("AppendEntries From {leaderID} to {followerID}", message.LeaderID, message.RecipientID);
+
 			_pulseMonitor.Pulse();
 
 			UpdateTerm(message.Term);
@@ -86,6 +91,8 @@ namespace NRaft
 
 		public void OnAppendEntriesResponse(AppendEntriesResponse message)
 		{
+			Log.Debug("AppendEntriesResponse From {followerID} to {leaderID}", message.FollowerID, message.LeaderID);
+
 			UpdateTerm(message.Term);
 
 			if (message.Term != _store.CurrentTerm)
@@ -106,6 +113,8 @@ namespace NRaft
 
 		public void OnRequestVote(RequestVoteRequest message)
 		{
+			Log.Debug("VoteRequest From {candidateID} to {nodeID}", message.CandidateID, _nodeID);
+
 			_pulseMonitor.Pulse();
 
 			UpdateTerm(message.Term);
@@ -123,6 +132,8 @@ namespace NRaft
 
 		public void OnRequestVoteResponse(RequestVoteResponse message)
 		{
+			Log.Debug("VoteResponse From {granterID} to {candidateID}", message.GranterID, message.CandidateID);
+
 			UpdateTerm(message.Term);
 
 			if (message.Term != _store.CurrentTerm)
