@@ -10,7 +10,7 @@ namespace NRaft
 {
 	public class Node : IDisposable
 	{
-		private static readonly ILogger Log = Serilog.Log.ForContext<Node>();
+		private readonly ILogger _log;
 
 		private readonly IStore _store;
 		private readonly IClock _clock;
@@ -37,6 +37,8 @@ namespace NRaft
 
 		public Node(IStore store, IClock clock, IConnector connector, int nodeID)
 		{
+			_log = Log.ForContext("nodeID", nodeID);
+
 			_store = store;
 			_clock = clock;
 			_connector = connector;
@@ -71,7 +73,7 @@ namespace NRaft
 
 		public void OnAppendEntries(AppendEntriesRequest message)
 		{
-			Log.Debug("AppendEntries From {leaderID} to {followerID}", message.LeaderID, message.RecipientID);
+			_log.Debug("AppendEntries From {leaderID} to {followerID}", message.LeaderID, message.RecipientID);
 
 			_pulseMonitor.Pulse();
 
@@ -91,7 +93,7 @@ namespace NRaft
 
 		public void OnAppendEntriesResponse(AppendEntriesResponse message)
 		{
-			Log.Debug("AppendEntriesResponse From {followerID} to {leaderID}", message.FollowerID, message.LeaderID);
+			_log.Debug("AppendEntriesResponse From {followerID} to {leaderID}", message.FollowerID, message.LeaderID);
 
 			UpdateTerm(message.Term);
 
@@ -113,7 +115,7 @@ namespace NRaft
 
 		public void OnRequestVote(RequestVoteRequest message)
 		{
-			Log.Debug("VoteRequest From {candidateID} to {nodeID}", message.CandidateID, _nodeID);
+			_log.Debug("VoteRequest From {candidateID} to {nodeID}", message.CandidateID, _nodeID);
 
 			_pulseMonitor.Pulse();
 
@@ -132,7 +134,7 @@ namespace NRaft
 
 		public void OnRequestVoteResponse(RequestVoteResponse message)
 		{
-			Log.Debug("VoteResponse From {granterID} to {candidateID}", message.GranterID, message.CandidateID);
+			_log.Debug("VoteResponse From {granterID} to {candidateID}", message.GranterID, message.CandidateID);
 
 			UpdateTerm(message.Term);
 
