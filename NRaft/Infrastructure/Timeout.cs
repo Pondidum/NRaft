@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace NRaft.Infrastructure
 {
 	public class Timeout : IPulseable
 	{
+		private static readonly ILogger Log = Serilog.Log.ForContext<Timeout>();
+
 		private DateTime _pulsedAt;
 		private bool _disposed;
 
@@ -38,10 +41,17 @@ namespace NRaft.Infrastructure
 			_task.ContinueWith(t =>
 			{
 				if (t.IsCanceled)
+				{
+					Log.Debug("Timer was cancelled");
 					return;
+				}
 
+
+				Log.Debug("Timer timed out");
 				_onTimeout();
 			});
+
+			Log.Information("Timer created, duration is {duration}ms", duration.TotalMilliseconds);
 		}
 
 		public Func<DateTime> GetTimestamp { get; set; }
@@ -49,7 +59,11 @@ namespace NRaft.Infrastructure
 
 		public void Pulse()
 		{
-			_pulsedAt = GetTimestamp();
+			var newPulse = GetTimestamp();
+
+			Log.Debug("Timeout Pulsed, time since previous pulse {elapsed}ms", newPulse.Subtract(_pulsedAt).TotalMilliseconds);
+
+			_pulsedAt = newPulse;
 		}
 
 		public void Dispose()
@@ -57,6 +71,7 @@ namespace NRaft.Infrastructure
 			if (_disposed)
 				return;
 
+			Log.Information("Stopping timer");
 			_disposed = true;
 
 			try
