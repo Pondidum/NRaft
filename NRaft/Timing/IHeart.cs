@@ -9,13 +9,4 @@ namespace NRaft.Timing
 
 		void ConnectTo(Action onHeartbeat);
 	}
-
-	public interface IPulseMonitor
-	{
-		void StartMonitoring(TimeSpan duration);
-		void StopMonitoring();
-		void Pulse();
-
-		void ConnectTo(Action onPulseLost);
-	}
 }
