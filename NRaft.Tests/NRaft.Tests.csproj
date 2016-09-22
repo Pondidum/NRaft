@@ -92,6 +92,7 @@
     <Compile Include="NodeTests\SendAppendEntriesTests.cs" />
     <Compile Include="NodeTests\NodeTests.cs" />
     <Compile Include="Storage\PersistentFileStoreTests.cs" />
+    <Compile Include="Timings\ElectionTimeoutTests.cs" />
     <Compile Include="Timings\HeartTests.cs" />
   </ItemGroup>
   <ItemGroup>
