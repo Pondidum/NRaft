@@ -94,6 +94,7 @@
     <Compile Include="Storage\PersistentFileStoreTests.cs" />
     <Compile Include="Timings\ElectionTimeoutTests.cs" />
     <Compile Include="Timings\HeartTests.cs" />
+    <Compile Include="Timings\PulseMonitorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

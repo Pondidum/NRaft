@@ -14,6 +14,7 @@ namespace NRaft.Timing
 	{
 		void StartMonitoring(TimeSpan duration);
 		void StopMonitoring();
+		void Pulse();
 
 		void ConnectTo(Action onPulseLost);
 	}
