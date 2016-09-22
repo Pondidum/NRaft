@@ -73,6 +73,7 @@
     <Compile Include="Storage\IStore.cs" />
     <Compile Include="Storage\PersistentFileStore.cs" />
     <Compile Include="Timeouts.cs" />
+    <Compile Include="Timing\ElectionTimeout.cs" />
     <Compile Include="Timing\Heart.cs" />
     <Compile Include="Timing\IHeart.cs" />
     <Compile Include="Types.cs" />
