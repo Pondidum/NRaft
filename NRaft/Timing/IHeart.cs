@@ -10,13 +10,6 @@ namespace NRaft.Timing
 		void ConnectTo(Action onHeartbeat);
 	}
 
-	public interface IElectionTimeout
-	{
-		void StartElection(TimeSpan duration);
-
-		void ConnectTo(Action onElectionOver);
-	}
-
 	public interface IPulseMonitor
 	{
 		void StartMonitoring(TimeSpan duration);
