@@ -12,7 +12,7 @@ namespace NRaft.Tests.Timings
 
 		public HeartTests()
 		{
-			//_heart = new Heart();
+			_heart = new Heart();
 		}
 
 		[Fact]
@@ -28,9 +28,21 @@ namespace NRaft.Tests.Timings
 			_heart.ConnectTo(() => beats++);
 			_heart.StartPulsing(TimeSpan.FromMilliseconds(50));
 
-			await Task.Delay(75);
+			await Task.Delay(10);
 
 			beats.ShouldBe(1);
+		}
+
+		[Fact]
+		public async Task When_beating()
+		{
+			var beats = 0;
+			_heart.ConnectTo(() => beats++);
+			_heart.StartPulsing(TimeSpan.FromMilliseconds(50));
+
+			await Task.Delay((50 * 10) + 25);
+
+			beats.ShouldBeGreaterThanOrEqualTo(9);
 		}
 
 		[Fact]
@@ -44,7 +56,7 @@ namespace NRaft.Tests.Timings
 
 			await Task.Delay(75);
 
-			beats.ShouldBe(1);
+			beats.ShouldBe(2);
 		}
 
 		[Fact]
@@ -61,7 +73,7 @@ namespace NRaft.Tests.Timings
 
 			await Task.Delay(75);
 
-			beats.ShouldBe(1);
+			beats.ShouldBe(2);
 		}
 
 		[Fact]
@@ -83,8 +95,8 @@ namespace NRaft.Tests.Timings
 
 			await Task.Delay(75);
 
-			beats.ShouldBe(1);
-			resurrectedBeats.ShouldBe(1);
+			beats.ShouldBe(2);
+			resurrectedBeats.ShouldBe(2);
 		}
 	}
 }
