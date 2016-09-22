@@ -12,7 +12,7 @@ namespace NRaft.Tests.Timings
 
 		public PulseMonitorTests()
 		{
-			//_monitor = new PulseMonitor();
+			_monitor = new PulseMonitor();
 		}
 
 		[Fact]
