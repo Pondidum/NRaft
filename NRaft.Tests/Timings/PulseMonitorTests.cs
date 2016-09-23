@@ -68,6 +68,12 @@ namespace NRaft.Tests.Timings
 		}
 
 		[Fact]
+		public void When_a_non_started_monitor_is_stopped()
+		{
+			Should.NotThrow(() => _monitor.StopMonitoring());
+		}
+
+		[Fact]
 		public async Task When_a_stopped_monitor_is_started_again()
 		{
 			var pulsesLost = 0;

@@ -31,11 +31,11 @@ namespace NRaft.Timing
 		{
 			try
 			{
-				_cancellation.Cancel();
-				_monitor.Wait();
+				_cancellation?.Cancel();
+				_monitor?.Wait();
 
-				_cancellation.Dispose();
-				_monitor.Dispose();
+				_cancellation?.Dispose();
+				_monitor?.Dispose();
 			}
 			catch (AggregateException)
 			{
