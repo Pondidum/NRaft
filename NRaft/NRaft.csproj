@@ -52,11 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Infrastructure\Clock.cs" />
-    <Compile Include="Infrastructure\IClock.cs" />
-    <Compile Include="Infrastructure\IPulseable.cs" />
     <Compile Include="Infrastructure\LoggingConnector.cs" />
-    <Compile Include="Infrastructure\Repeater.cs" />
     <Compile Include="Messages\AppendEntriesResponse.cs" />
     <Compile Include="Messages\AppendEntriesRequest.cs" />
     <Compile Include="Infrastructure\IConnector.cs" />
@@ -67,7 +63,6 @@
     <Compile Include="Messages\RequestVoteResponse.cs" />
     <Compile Include="Messages\RequestVoteRequest.cs" />
     <Compile Include="Node.cs" />
-    <Compile Include="Infrastructure\Timeout.cs" />
     <Compile Include="Storage\IFileSystem.cs" />
     <Compile Include="Storage\InMemoryStore.cs" />
     <Compile Include="Storage\IStore.cs" />

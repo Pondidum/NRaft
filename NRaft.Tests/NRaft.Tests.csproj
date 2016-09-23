@@ -69,12 +69,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcceptanceTests.cs" />
-    <Compile Include="Infrastructure\TimeoutTests.cs" />
     <Compile Include="TestInfrastructure\ControllableTimers.cs" />
     <Compile Include="Infrastructure\QuorumTests.cs" />
     <Compile Include="TestInfrastructure\ElectionTimer.cs" />
     <Compile Include="TestInfrastructure\HeartbeatRepeater.cs" />
-    <Compile Include="TestInfrastructure\HeartbeatTimer.cs" />
     <Compile Include="TestInfrastructure\InMemoryConnector.cs" />
     <Compile Include="TestInfrastructure\InMemoryFileSystem.cs" />
     <Compile Include="NodeTests\CandidateTests.cs" />
