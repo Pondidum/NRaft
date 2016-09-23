@@ -20,10 +20,7 @@ namespace NRaft.Timing
 
 			if (_emitter == null || _emitter.IsCanceled || _emitter.IsCompleted || _cancellation.IsCancellationRequested)
 			{
-				_cancellation?.Dispose();
 				_cancellation = new CancellationTokenSource();
-
-				_emitter?.Dispose();
 				_emitter = Task.Run(() => Beat(), _cancellation.Token);
 			}
 		}
@@ -32,8 +29,11 @@ namespace NRaft.Timing
 		{
 			try
 			{
-				_cancellation.Cancel();
-				_emitter.Wait();
+				_cancellation?.Cancel();
+				_emitter?.Wait();
+
+				_cancellation?.Dispose();
+				_emitter?.Dispose();
 			}
 			catch (AggregateException)
 			{

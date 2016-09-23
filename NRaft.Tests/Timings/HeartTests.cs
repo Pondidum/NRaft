@@ -77,6 +77,12 @@ namespace NRaft.Tests.Timings
 		}
 
 		[Fact]
+		public void When_a_non_started_heart_is_stopped()
+		{
+			Should.NotThrow(() => _heart.StopPulsing());
+		}
+
+		[Fact]
 		public async Task A_stopped_heart_can_be_started()
 		{
 
