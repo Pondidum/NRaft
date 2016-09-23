@@ -19,23 +19,23 @@ namespace NRaft.Tests.NodeTests
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly Node _node;
-		private readonly ControllableClock _clock;
+		private readonly ControllableTimers _timers;
 
 		public BecomeLeaderTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = 2;
 
-			_clock = new ControllableClock();
+			_timers = new ControllableTimers();
 
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.SendHeartbeat(Arg.Any<AppendEntriesRequest>()))
 				.Do(cb => _heartbeat = cb.Arg<AppendEntriesRequest>());
 
-			_node = new Node(_store, _clock, _connector, NodeID);
+			_node = new Node(_store, _timers, _connector, NodeID);
 
-			_clock.EndCurrentHeartbeat();
+			_timers.LoosePulse();
 
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
@@ -58,7 +58,7 @@ namespace NRaft.Tests.NodeTests
 		public void If_the_node_is_not_a_candidate()
 		{
 			_node.OnAppendEntries(new AppendEntriesRequest { Term = _store.CurrentTerm + 1 });
-			_clock.EndCurrentElection();
+			_timers.EndElection();
 
 			//when an election fails, we start a new one, thus becoming a candidate instead of a follower
 			_node.Role.ShouldBe(Types.Candidate);
@@ -69,7 +69,7 @@ namespace NRaft.Tests.NodeTests
 		{
 			_node.ResetVotes();
 
-			_clock.EndCurrentElection();
+			_timers.EndElection();
 
 			_node.Role.ShouldBe(Types.Candidate);
 		}
@@ -77,14 +77,14 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void The_role_changes()
 		{
-			_clock.EndCurrentElection();
+			_timers.EndElection();
 			_node.Role.ShouldBe(Types.Leader);
 		}
 
 		[Fact]
 		public void The_next_index_for_every_other_client_is_set_to_last_log_index()
 		{
-			_clock.EndCurrentElection();
+			_timers.EndElection();
 
 			var nextLogIndex = _store.Log.Last().Index + 1;
 
@@ -99,7 +99,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void The_match_index_for_every_other_client_is_set_to_zero()
 		{
-			_clock.EndCurrentElection();
+			_timers.EndElection();
 
 			var outcomes = _node
 				.KnownNodes
@@ -112,7 +112,7 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void It_sends_append_entries_to_all()
 		{
-			_clock.EndCurrentElection();
+			_timers.EndElection();
 
 			var index = _node.NextIndexFor(_heartbeat.RecipientID) - 1;
 

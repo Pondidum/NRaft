@@ -2,6 +2,8 @@
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
+using NRaft.Tests.TestInfrastructure;
+using NRaft.Timing;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -10,39 +12,30 @@ namespace NRaft.Tests.NodeTests
 {
 	public class FollowerTests
 	{
-		private readonly IPulseable _heart;
 		private readonly Node _node;
-
-		private Action _elapsed;
+		private readonly ControllableTimers _timers;
 
 		public FollowerTests()
 		{
 			var store = Substitute.For<IStore>();
-			var clock = Substitute.For<IClock>();
+			_timers = new ControllableTimers();
 			var connector = Substitute.For<IConnector>();
-
-			_heart = Substitute.For<IPulseable>();
-
-			clock
-				.CreatePulseTimeout(Arg.Any<TimeSpan>(), Arg.Any<Action>())
-				.Returns(_heart)
-				.AndDoes(cb => _elapsed = cb.Arg<Action>());
-
-			_node = new Node(store, clock, connector, 1234);
+			
+			_node = new Node(store, _timers, connector, 1234);
 		}
 
 		[Fact]
-		public void OnAppendEntries_pulses_the_heart()
+		public void OnAppendEntries_pulses_the_pulse()
 		{
 			_node.OnAppendEntries(new AppendEntriesRequest());
 
-			_heart.Received(1).Pulse();
+			_timers.PulseMonitor.Received(1).Pulse();
 		}
 
 		[Fact]
-		public void When_the_heart_times_out()
+		public void When_the_pulse_times_out()
 		{
-			_elapsed();
+			_timers.LoosePulse();
 			_node.Role.ShouldBe(Types.Candidate);
 		}
 	}

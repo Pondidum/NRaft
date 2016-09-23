@@ -21,11 +21,11 @@ namespace NRaft.Tests.NodeTests
 			_store = new InMemoryStore();
 			_store.CurrentTerm = CurrentTerm - 1;
 
-			var clock = new ControllableClock();
+			var clock = new ControllableTimers();
 			var dispatcher = Substitute.For<IConnector>();
 
 			_node = new Node(_store, clock, dispatcher, NodeID);
-			clock.EndCurrentHeartbeat();
+			clock.LoosePulse();
 		}
 
 		[Fact]

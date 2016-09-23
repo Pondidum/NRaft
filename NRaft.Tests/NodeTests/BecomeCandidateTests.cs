@@ -14,7 +14,7 @@ namespace NRaft.Tests.NodeTests
 		private const int NodeID = 123;
 
 		private readonly InMemoryStore _store;
-		private readonly ControllableClock _clock;
+		private readonly ControllableTimers _timers;
 		private readonly IConnector _connector;
 		private readonly Node _node;
 
@@ -25,14 +25,14 @@ namespace NRaft.Tests.NodeTests
 			_store = new InMemoryStore();
 			_store.CurrentTerm = 2;
 
-			_clock = new ControllableClock();
+			_timers = new ControllableTimers();
 
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.RequestVotes(Arg.Any<RequestVoteRequest>()))
 				.Do(cb => _response = cb.Arg<RequestVoteRequest>());
 
-			_node = new Node(_store, _clock, _connector, NodeID);
+			_node = new Node(_store, _timers, _connector, NodeID);
 
 			_node.OnRequestVoteResponse(new RequestVoteResponse
 			{
@@ -50,7 +50,7 @@ namespace NRaft.Tests.NodeTests
 				new LogEntry { Index = 5, Term = 2 }
 			};
 
-			_clock.EndCurrentHeartbeat();
+			_timers.LoosePulse();
 		}
 
 		[Fact]

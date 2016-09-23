@@ -70,7 +70,7 @@
   <ItemGroup>
     <Compile Include="AcceptanceTests.cs" />
     <Compile Include="Infrastructure\TimeoutTests.cs" />
-    <Compile Include="TestInfrastructure\ControllableClock.cs" />
+    <Compile Include="TestInfrastructure\ControllableTimers.cs" />
     <Compile Include="Infrastructure\QuorumTests.cs" />
     <Compile Include="TestInfrastructure\ElectionTimer.cs" />
     <Compile Include="TestInfrastructure\HeartbeatRepeater.cs" />

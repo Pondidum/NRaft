@@ -16,17 +16,17 @@ namespace NRaft.Tests.NodeTests
 		private readonly IConnector _connector;
 		private readonly Node _node;
 		private readonly InMemoryStore _store;
-		private readonly ControllableClock _clock;
+		private readonly ControllableTimers _timers;
 
 		public AdvanceCommitIndexTests()
 		{
 			_store = new InMemoryStore();
-			_clock = new ControllableClock();
+			_timers = new ControllableTimers();
 			_connector = Substitute.For<IConnector>();
 
-			_node = new Node(_store, _clock, _connector, NodeID);
-			_clock.EndCurrentHeartbeat();
-			_clock.EndCurrentElection();
+			_node = new Node(_store, _timers, _connector, NodeID);
+			_timers.LoosePulse();
+			_timers.EndElection();
 
 			//create committed log
 			_store.Log = new[] {

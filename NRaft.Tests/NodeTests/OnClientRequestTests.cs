@@ -12,15 +12,15 @@ namespace NRaft.Tests.NodeTests
 	{
 		private readonly InMemoryStore _store;
 		private readonly Node _node;
-		private readonly ControllableClock _clock;
+		private readonly ControllableTimers _timers;
 
 		public OnClientRequestTests()
 		{
 			_store = new InMemoryStore();
-			_clock = new ControllableClock();
+			_timers = new ControllableTimers();
 			var dispatcher = Substitute.For<IConnector>();
 
-			_node = new Node(_store, _clock, dispatcher, 1234);
+			_node = new Node(_store, _timers, dispatcher, 1234);
 		}
 
 		[Fact]
@@ -36,8 +36,8 @@ namespace NRaft.Tests.NodeTests
 		{
 			var value = new Dto { Value = "abc" };
 
-			_clock.EndCurrentHeartbeat();
-			_clock.EndCurrentElection();
+			_timers.LoosePulse();
+			_timers.EndElection();
 
 			_node.OnClientRequest(value);
 

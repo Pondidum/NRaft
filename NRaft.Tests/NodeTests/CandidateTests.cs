@@ -16,7 +16,7 @@ namespace NRaft.Tests.NodeTests
 
 		private readonly Node _node;
 
-		private readonly ControllableClock _clock;
+		private readonly ControllableTimers _timers;
 		private readonly IStore _store;
 		private readonly IConnector _connector;
 
@@ -24,45 +24,42 @@ namespace NRaft.Tests.NodeTests
 		{
 			_store = Substitute.For<IStore>();
 			_connector = Substitute.For<IConnector>();
-			_clock = new ControllableClock();
+			_timers = new ControllableTimers();
 
-			_node = new Node(_store, _clock, _connector, NodeID);
+			_node = new Node(_store, _timers, _connector, NodeID);
 			_node.AddNodeToCluster(OtherNodeID);
 		}
 
 		[Fact]
 		public void The_timeout_isnt_started_if_the_node_doesnt_become_a_candidate()
 		{
-			_clock.LastElectionTimer.ShouldBeNull();
+			_timers.Election.DidNotReceive().StartElection(Arg.Any<TimeSpan>());
 		}
 
 		[Fact]
 		public void Becoming_a_candidate_starts_an_election_timeout()
 		{
-			_clock.EndCurrentHeartbeat();
+			_timers.LoosePulse();
 
-			_clock.LastElectionTimer.ShouldNotBeNull();
+			_timers.Election.Received().StartElection(Arg.Any<TimeSpan>());
 		}
 
 		[Fact]
 		public void When_the_election_times_out_with_no_consensus()
 		{
-			_clock.EndCurrentHeartbeat();
+			_timers.LoosePulse();
 			_connector.ClearReceivedCalls();
 
-			var currentElection = _clock.LastElectionTimer;
-
-			_clock.EndCurrentElection();
+			_timers.EndElection();
 
 			_node.Role.ShouldBe(Types.Candidate);
-			currentElection.WasDisposed.ShouldBeTrue();
 			_connector.Received().RequestVotes(Arg.Any<RequestVoteRequest>());
 		}
 
 		[Fact]
 		public void When_the_election_times_out_with_consensus()
 		{
-			_clock.EndCurrentHeartbeat();
+			_timers.LoosePulse();
 			_node.OnRequestVoteResponse(new RequestVoteResponse
 			{
 				CandidateID = NodeID,
@@ -70,12 +67,10 @@ namespace NRaft.Tests.NodeTests
 				Term = _store.CurrentTerm,
 				VoteGranted = true,
 			});
-
-			var currentElection = _clock.LastElectionTimer;
-			_clock.EndCurrentElection();
+			
+			_timers.EndElection();
 
 			_node.Role.ShouldBe(Types.Leader);
-			currentElection.WasDisposed.ShouldBeTrue();
 		}
 	}
 }

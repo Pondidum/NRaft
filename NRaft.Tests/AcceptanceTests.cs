@@ -18,8 +18,8 @@ namespace NRaft.Tests
 			var firstStore = new InMemoryStore();
 			var secondStore = new InMemoryStore();
 
-			var firstClock = new ControllableClock();
-			var secondClock = new ControllableClock();
+			var firstClock = new ControllableTimers();
+			var secondClock = new ControllableTimers();
 
 			var first = new Node(firstStore, firstClock, dispatcher, 1);
 			var second = new Node(secondStore, secondClock, dispatcher, 2);
@@ -27,14 +27,14 @@ namespace NRaft.Tests
 			first.AddNodeToCluster(2);
 			second.AddNodeToCluster(1);
 
-			firstClock.EndCurrentHeartbeat();
+			firstClock.LoosePulse();
 
 			first.VotesGranted.ShouldBe(new[] { 1, 2 });
 			first.VotesResponded.ShouldBe(new[] { 1, 2 });
 
 			//election timeout elapses...
 
-			firstClock.EndCurrentElection();
+			firstClock.EndElection();
 			first.Role.ShouldBe(Types.Leader);
 
 			first.OnClientRequest("testing");

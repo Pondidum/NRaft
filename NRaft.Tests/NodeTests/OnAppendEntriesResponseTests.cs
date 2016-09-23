@@ -13,18 +13,18 @@ namespace NRaft.Tests.NodeTests
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
 		private readonly Node _node;
-		private readonly ControllableClock _clock;
+		private readonly ControllableTimers _timers;
 
 		public OnAppendEntriesResponseTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = 3;
-			_clock = new ControllableClock();
+			_timers = new ControllableTimers();
 			_connector = Substitute.For<IConnector>();
 
-			_node = new Node(_store, _clock, _connector, 10);
-			_clock.EndCurrentHeartbeat();
-			_clock.EndCurrentElection();
+			_node = new Node(_store, _timers, _connector, 10);
+			_timers.LoosePulse();
+			_timers.EndElection();
 		}
 
 		[Fact]

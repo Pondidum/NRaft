@@ -18,21 +18,21 @@ namespace NRaft.Tests.NodeTests
 		private readonly Node _node;
 		private readonly InMemoryStore _store;
 		private readonly IConnector _connector;
-		private readonly ControllableClock _clock;
+		private readonly ControllableTimers _timers;
 
 		public OnAppendEntriesTests()
 		{
 			_store = new InMemoryStore();
 			_store.CurrentTerm = CurrentTerm;
 
-			_clock = new ControllableClock();
+			_timers = new ControllableTimers();
 
 			_connector = Substitute.For<IConnector>();
 			_connector
 				.When(d => d.SendReply(Arg.Any<AppendEntriesResponse>()))
 				.Do(cb => _response = cb.Arg<AppendEntriesResponse>());
 
-			_node = new Node(_store, _clock, _connector, 10);
+			_node = new Node(_store, _timers, _connector, 10);
 			_store.Log = new[] {
 				new LogEntry { Index = 1, Term = 0 },
 				new LogEntry { Index = 2, Term = 1 },
@@ -59,8 +59,8 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_higher_term()
 		{
-			_clock.EndCurrentHeartbeat();
-			_clock.EndCurrentElection();
+			_timers.LoosePulse();
+			_timers.EndElection();
 
 			_node.OnAppendEntries(new AppendEntriesRequest
 			{
@@ -74,8 +74,8 @@ namespace NRaft.Tests.NodeTests
 		[Fact]
 		public void When_the_node_is_a_leader_receives_a_message_from_a_leader_with_a_lower_term()
 		{
-			_clock.EndCurrentHeartbeat();
-			_clock.EndCurrentElection();
+			_timers.LoosePulse();
+			_timers.EndElection();
 
 			var previousTerm = _store.CurrentTerm;
 
@@ -244,7 +244,7 @@ namespace NRaft.Tests.NodeTests
 		public void When_the_node_is_a_candidate_and_the_terms_are_equal()
 		{
 			_store.CurrentTerm = _store.CurrentTerm - 1;
-			_clock.EndCurrentHeartbeat();
+			_timers.LoosePulse();
 
 			_node.OnAppendEntries(new AppendEntriesRequest
 			{
