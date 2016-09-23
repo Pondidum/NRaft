@@ -4,6 +4,7 @@ using System.Linq;
 using NRaft.Infrastructure;
 using NRaft.Messages;
 using NRaft.Storage;
+using NRaft.Timing;
 using Serilog;
 
 namespace NRaft
@@ -13,9 +14,12 @@ namespace NRaft
 		private readonly ILogger _log;
 
 		private readonly IStore _store;
-		private readonly IClock _clock;
 		private readonly IConnector _connector;
 		private readonly int _nodeID;
+		private readonly IHeart _heart;
+		private readonly IElectionTimeout _election;
+		private readonly IPulseMonitor _pulseMonitor;
+
 
 		private readonly HashSet<int> _knownNodes;
 		private HashSet<HashSet<int>> _quorum;
@@ -31,20 +35,25 @@ namespace NRaft
 		//candidate0only state - perhaps subclass or extract
 		private readonly HashSet<int> _votesResponded;
 		private readonly HashSet<int> _votesGranted;
-		private IPulseable _pulseMonitor;
-		private IDisposable _election;
-		private IDisposable _heartbeat;
 
-		public Node(IStore store, IClock clock, IConnector connector, int nodeID)
+		public Node(IStore store, ITimers timers, IConnector connector, int nodeID)
 		{
 			_log = Log.ForContext("nodeID", nodeID);
 
 			_store = store;
-			_clock = clock;
 			_connector = connector;
 			_nodeID = nodeID;
+
+			_heart = timers.Heart;
+			_election = timers.Election;
+			_pulseMonitor = timers.PulseMonitor;
+
 			_knownNodes = new HashSet<int>();
 			_quorum = new HashSet<HashSet<int>>();
+
+			_heart.ConnectTo(SendAppendEntries);
+			_election.ConnectTo(OnElectionOver);
+			_pulseMonitor.ConnectTo(OnPulseLost);
 
 			AddNodeToCluster(nodeID);
 
@@ -157,9 +166,9 @@ namespace NRaft
 		{
 			Role = Types.Follower;
 
-			_heartbeat?.Dispose();
-			_pulseMonitor?.Dispose();
-			_pulseMonitor = _clock.CreatePulseTimeout(Timeouts.GetMaxPulseInterval(), OnHeartbeatElapsed); //should be random...
+			_heart.StopPulsing();
+			_pulseMonitor.StartMonitoring(Timeouts.GetMaxPulseInterval());
+
 		}
 
 		public void SendAppendEntries()
@@ -316,15 +325,13 @@ namespace NRaft
 		}
 
 		//I wanted to call this OnHeartFailure...
-		private void OnHeartbeatElapsed()
+		private void OnPulseLost()
 		{
 			BecomeCandidate();
 		}
 
-		private void OnElectionTimeout()
+		private void OnElectionOver()
 		{
-			_election?.Dispose();
-
 			BecomeLeader();
 
 			if (Role != Types.Leader)
@@ -333,8 +340,8 @@ namespace NRaft
 
 		private void BecomeCandidate()
 		{
-			_heartbeat?.Dispose();
-			_pulseMonitor.Dispose();
+			_heart.StopPulsing();
+			_pulseMonitor.StopMonitoring();
 
 			Role = Types.Candidate;
 
@@ -362,12 +369,12 @@ namespace NRaft
 				LastLogTerm = LastTerm()
 			});
 
-			_election = _clock.CreateElectionTimeout(Timeouts.GetElectionTimeout(), OnElectionTimeout); //or whatever the electiontimeout is
+			_election.StartElection(Timeouts.GetElectionTimeout());
 		}
 
 		private void BecomeLeader()
 		{
-			_pulseMonitor.Dispose();
+			_pulseMonitor.StopMonitoring();
 
 			if (Role != Types.Candidate)
 				return;
@@ -386,7 +393,7 @@ namespace NRaft
 				_matchIndex[nodeID] = 0;
 
 			SendAppendEntries();
-			_heartbeat = _clock.CreateHeartbeat(Timeouts.GetHeartRate(), SendAppendEntries);
+			_heart.StartPulsing(Timeouts.GetHeartRate());
 		}
 
 		public void Dispose()
