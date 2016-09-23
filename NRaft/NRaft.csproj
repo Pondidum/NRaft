@@ -78,7 +78,9 @@
     <Compile Include="Timing\IElectionTimeout.cs" />
     <Compile Include="Timing\IHeart.cs" />
     <Compile Include="Timing\IPulseMonitor.cs" />
+    <Compile Include="Timing\ITimers.cs" />
     <Compile Include="Timing\PulseMonitor.cs" />
+    <Compile Include="Timing\Timers.cs" />
     <Compile Include="Types.cs" />
   </ItemGroup>
   <ItemGroup>
