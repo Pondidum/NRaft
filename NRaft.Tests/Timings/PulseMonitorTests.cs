@@ -91,5 +91,26 @@ namespace NRaft.Tests.Timings
 
 			pulsesLost.ShouldBe(1);
 		}
+
+		[Fact]
+		public async Task When_a_monitor_is_stopped_within_its_callback()
+		{
+			var pre = 0;
+			var post = 0;
+
+			_monitor.ConnectTo(() =>
+			{
+				pre++;
+				_monitor.StopMonitoring();
+				post++;
+			});
+
+			_monitor.StartMonitoring(TimeSpan.FromMilliseconds(30));
+
+			await Task.Delay(TimeSpan.FromMilliseconds(50));
+
+			pre.ShouldBe(1);
+			post.ShouldBe(1);
+		}
 	}
 }

@@ -20,11 +20,16 @@ namespace NRaft.Timing
 			_duration = duration;
 			_cancellation = new CancellationTokenSource();
 
+			StopMonitoring();
+
+			_cancellation = new CancellationTokenSource();
 			_monitor = Task.Run(() =>
 			{
 				Pulse();
 				Monitor();
 			}, _cancellation.Token);
+
+			_monitor.ContinueWith(InvokeCallback);
 		}
 
 		public void StopMonitoring()
@@ -33,13 +38,13 @@ namespace NRaft.Timing
 			{
 				_cancellation?.Cancel();
 				_monitor?.Wait();
-
-				_cancellation?.Dispose();
-				_monitor?.Dispose();
 			}
 			catch (AggregateException)
 			{
 			}
+
+			_cancellation?.Dispose();
+			_monitor?.Dispose();
 		}
 
 		public void Pulse()
@@ -60,8 +65,11 @@ namespace NRaft.Timing
 					.Delay(TimeSpan.FromMilliseconds(10), _cancellation.Token)
 					.Wait(_cancellation.Token);
 			}
+		}
 
-			if (_cancellation.IsCancellationRequested == false)
+		private void InvokeCallback(Task t)
+		{
+			if (t.IsCanceled == false)
 				_onPulseLost();
 		}
 	}
