@@ -1,88 +1,89 @@
 ﻿using System;
 using NRaft.Messages;
+using Serilog;
 
 namespace NRaft.Infrastructure
 {
 	public class LoggingConnector : IConnector
 	{
-		private readonly IConnector _other;
-		private readonly Action<string> _write;
+		private static readonly ILogger Log = Serilog.Log.ForContext<LoggingConnector>();
 
-		public LoggingConnector(IConnector other, Action<string> write)
+		private readonly IConnector _other;
+
+		public LoggingConnector(IConnector other)
 		{
 			_other = other;
-			_write = write;
 		}
 
 		public void Register(int nodeID, Action<AppendEntriesRequest> handler)
 		{
-			_write($"Node {nodeID} registered for AppendEntriesRequest");
+			Log.Debug("Node {nodeID} registered for AppendEntriesRequest", nodeID);
 			_other.Register(nodeID, handler);
 		}
 
 		public void Register(int nodeID, Action<AppendEntriesResponse> handler)
 		{
-			_write($"Node {nodeID} registered for AppendEntriesResponse");
+			Log.Debug("Node {nodeID} registered for AppendEntriesResponse", nodeID);
 			_other.Register(nodeID, handler);
 		}
 
 		public void Register(int nodeID, Action<RequestVoteRequest> handler)
 		{
-			_write($"Node {nodeID} registered for RequestVoteRequest");
+			Log.Debug("Node {nodeID} registered for RequestVoteRequest", nodeID);
 			_other.Register(nodeID, handler);
 		}
 
 		public void Register(int nodeID, Action<RequestVoteResponse> handler)
 		{
-			_write($"Node {nodeID} registered for RequestVoteResponse");
+			Log.Debug("Node {nodeID} registered for RequestVoteResponse", nodeID);
 			_other.Register(nodeID, handler);
 		}
 
 		public void Deregister(int nodeID, Action<AppendEntriesRequest> handler)
 		{
-			_write($"Node {nodeID} deregistered for AppendEntriesRequest");
+			Log.Debug("Node {nodeID} deregistered for AppendEntriesRequest", nodeID);
 			_other.Deregister(nodeID, handler);
 		}
 
 		public void Deregister(int nodeID, Action<AppendEntriesResponse> handler)
 		{
-			_write($"Node {nodeID} deregistered for AppendEntriesResponse");
+			Log.Debug("Node {nodeID} deregistered for AppendEntriesResponse", nodeID);
 			_other.Deregister(nodeID, handler);
 		}
 
 		public void Deregister(int nodeID, Action<RequestVoteRequest> handler)
 		{
-			_write($"Node {nodeID} deregistered for RequestVoteRequest");
+			Log.Debug("Node {nodeID} deregistered for RequestVoteRequest", nodeID);
 			_other.Deregister(nodeID, handler);
 		}
 
 		public void Deregister(int nodeID, Action<RequestVoteResponse> handler)
 		{
-			_write($"Node {nodeID} deregistered for RequestVoteResponse");
+			Log.Debug("Node {nodeID} deregistered for RequestVoteResponse", nodeID);
 			_other.Deregister(nodeID, handler);
 		}
 
 		public void SendReply(AppendEntriesResponse message)
 		{
-			_write($"Node {message.FollowerID} AppendEntriesResponse => {message.LeaderID}");
+			Log.Information("Node {followerID} AppendEntriesResponse => {leaderID}", message.FollowerID, message.LeaderID);
 			_other.SendReply(message);
 		}
 
 		public void SendReply(RequestVoteResponse message)
 		{
-			_write($"Node {message.GranterID} RequestVoteResponse => {message.CandidateID}");
+			Log.Information("Node {granterID} RequestVoteResponse => {candidateID}", message.GranterID, message.CandidateID);
 			_other.SendReply(message);
 		}
 
 		public void RequestVotes(RequestVoteRequest message)
 		{
-			_write($"Node {message.CandidateID} RequestVoteRequest => All");
+			Log.Information("Node {candidateID} RequestVoteRequest => All", message.CandidateID);
 			_other.RequestVotes(message);
 		}
 
 		public void SendHeartbeat(AppendEntriesRequest message)
 		{
-			_write($"Node {message.LeaderID} AppendEntriesRequest => {message.RecipientID}");
+			Log.Information("Node {eaderID} AppendEntriesRequest => {recipientID}", message.LeaderID, message.RecipientID);
 			_other.SendHeartbeat(message);
 		}
 	}
