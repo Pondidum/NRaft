@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace NRaft.Timing
 {
 	public class ElectionTimeout : IElectionTimeout
 	{
+		private static readonly ILogger Log = Serilog.Log.ForContext<ElectionTimeout>();
+
 		private TimeSpan _duration;
 		private Action _onElectionOver;
 		private Task _timeout;
@@ -15,6 +18,8 @@ namespace NRaft.Timing
 		{
 			if (_onElectionOver == null)
 				throw new InvalidOperationException(".ConnectTo(Action onElectionOver) must have been called at least once.");
+
+			Log.Information("Started Election, with a duration of {elapsed}ms", duration.TotalMilliseconds);
 
 			_duration = duration;
 
@@ -46,6 +51,7 @@ namespace NRaft.Timing
 		{
 			Task.Delay(_duration, _cancellation.Token).Wait(_cancellation.Token);
 
+			Log.Information("Election ended");
 			_onElectionOver();
 		}
 	}
