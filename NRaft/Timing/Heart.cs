@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace NRaft.Timing
 {
 	public class Heart : IHeart
 	{
+		private static readonly ILogger Log = Serilog.Log.ForContext<Heart>();
+
 		private Action _onHeartbeat;
 		private TimeSpan _interval;
 		private Task _emitter;
@@ -17,6 +20,7 @@ namespace NRaft.Timing
 				throw new InvalidOperationException(".ConnectTo(Action onHeartbeat) must have been called at least once.");
 
 			_interval = interval;
+			Log.Information("Heart stared, beating every {elapsed}ms", interval.TotalMilliseconds);
 
 			if (_emitter == null || _emitter.IsCanceled || _emitter.IsCompleted || _cancellation.IsCancellationRequested)
 			{
@@ -38,6 +42,8 @@ namespace NRaft.Timing
 			catch (AggregateException)
 			{
 			}
+
+			Log.Information("Heart stopped");
 		}
 
 		public void ConnectTo(Action onHeartbeat)
