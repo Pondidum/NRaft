@@ -55,14 +55,13 @@ namespace NRaft
 			_election.ConnectTo(OnElectionOver);
 			_pulseMonitor.ConnectTo(OnPulseLost);
 
-			AddNodeToCluster(nodeID);
-
 			_nextIndex = new LightweightCache<int, int>(id => 1);
 			_matchIndex = new LightweightCache<int, int>(id => 1);
 
 			_votesResponded = new HashSet<int>();
 			_votesGranted = new HashSet<int>();
 
+			BuildQuorum();
 			BecomeFollower();
 
 			CommitIndex = 0;
@@ -143,7 +142,8 @@ namespace NRaft
 
 		public void OnRequestVoteResponse(RequestVoteResponse message)
 		{
-			_log.Debug("VoteResponse From {granterID} to {candidateID}", message.GranterID, message.CandidateID);
+			if (message.GranterID != _nodeID)
+				_log.Debug("VoteResponse From {granterID} to {candidateID}", message.GranterID, message.CandidateID);
 
 			UpdateTerm(message.Term);
 
@@ -164,6 +164,7 @@ namespace NRaft
 
 		private void BecomeFollower()
 		{
+			_log.Information("Node {nodeID} transitioning from {previousRole} to {newRole}", _nodeID, Role, Types.Follower);
 			Role = Types.Follower;
 
 			_heart.StopPulsing();
@@ -220,7 +221,12 @@ namespace NRaft
 		public void AddNodeToCluster(int nodeID)
 		{
 			_knownNodes.Add(nodeID);
-			_quorum = Quorum.GenerateAllPossibilities(_knownNodes.ToArray());
+			BuildQuorum();
+		}
+
+		private void BuildQuorum()
+		{
+			_quorum = Quorum.GenerateAllPossibilities(_knownNodes.Concat(new[] { _nodeID }).ToArray());
 		}
 
 		public void AdvanceCommitIndex()
@@ -340,6 +346,8 @@ namespace NRaft
 
 		private void BecomeCandidate()
 		{
+			_log.Information("Node {nodeID} transitioning from {previousRole} to {newRole}", _nodeID, Role, Types.Candidate);
+
 			_heart.StopPulsing();
 			_pulseMonitor.StopMonitoring();
 
@@ -357,6 +365,7 @@ namespace NRaft
 			OnRequestVoteResponse(new RequestVoteResponse
 			{
 				GranterID = _nodeID,
+				CandidateID = _nodeID,
 				Term = _store.CurrentTerm,
 				VoteGranted = true
 			});
@@ -374,13 +383,18 @@ namespace NRaft
 
 		private void BecomeLeader()
 		{
-			_pulseMonitor.StopMonitoring();
-
 			if (Role != Types.Candidate)
 				return;
 
 			if (_quorum.Any(q => q.IsSubsetOf(_votesGranted)) == false)
+			{
+				_log.Information("Node {nodeID} attempted to become leader but only had vots from {votes}", _nodeID, _votesGranted);
 				return;
+			}
+
+			_log.Information("Node {nodeID} transitioning from {previousRole} to {newRole}", _nodeID, Role, Types.Leader);
+
+			_pulseMonitor.StopMonitoring();
 
 			Role = Types.Leader;
 
@@ -392,7 +406,7 @@ namespace NRaft
 			foreach (var nodeID in KnownNodes)
 				_matchIndex[nodeID] = 0;
 
-			SendAppendEntries();
+			//SendAppendEntries(); //StartPulsing now sends immiediately
 			_heart.StartPulsing(Timeouts.GetHeartRate());
 		}
 
