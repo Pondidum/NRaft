@@ -112,5 +112,16 @@ namespace NRaft.Tests.Timings
 			pre.ShouldBe(1);
 			post.ShouldBe(1);
 		}
+
+		[Fact]
+		public void When_a_monitor_is_stopped_twice()
+		{
+			_monitor.ConnectTo(() => { });
+			_monitor.StartMonitoring(TimeSpan.FromMilliseconds(20));
+
+			_monitor.StopMonitoring();
+
+			Should.NotThrow(() => _monitor.StopMonitoring());
+		}
 	}
 }

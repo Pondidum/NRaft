@@ -45,6 +45,9 @@ namespace NRaft.Timing
 
 			_cancellation?.Dispose();
 			_monitor?.Dispose();
+
+			_cancellation = null;
+			_monitor = null;
 		}
 
 		public void Pulse()
