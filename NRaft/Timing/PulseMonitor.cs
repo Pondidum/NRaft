@@ -73,11 +73,17 @@ namespace NRaft.Timing
 
 		private void Monitor()
 		{
-			while (DateTime.UtcNow.Subtract(_lastPulse) < _duration && _cancellation.IsCancellationRequested == false)
+			try
 			{
-				Task
-					.Delay(TimeSpan.FromMilliseconds(10), _cancellation.Token)
-					.Wait(_cancellation.Token);
+				while (DateTime.UtcNow.Subtract(_lastPulse) < _duration && _cancellation.IsCancellationRequested == false)
+				{
+					Task
+						.Delay(TimeSpan.FromMilliseconds(10), _cancellation.Token)
+						.Wait(_cancellation.Token);
+				}
+			}
+			catch (OperationCanceledException)
+			{
 			}
 		}
 

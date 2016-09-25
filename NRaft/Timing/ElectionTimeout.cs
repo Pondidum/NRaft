@@ -49,10 +49,16 @@ namespace NRaft.Timing
 
 		private void Election()
 		{
-			Task.Delay(_duration, _cancellation.Token).Wait(_cancellation.Token);
+			try
+			{
+				Task.Delay(_duration, _cancellation.Token).Wait(_cancellation.Token);
 
-			Log.Information("Election ended");
-			_onElectionOver();
+				Log.Information("Election ended");
+				_onElectionOver();
+			}
+			catch (OperationCanceledException)
+			{
+			}
 		}
 	}
 }
