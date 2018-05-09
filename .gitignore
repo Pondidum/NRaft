@@ -10,3 +10,4 @@ project.lock.json
 /packages
 /node_modules
 /.vs
+.idea/
