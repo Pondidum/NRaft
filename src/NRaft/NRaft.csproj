@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>NRaft</PackageId>
+    <PackageTags>raft;consensus;distributed</PackageTags>
+    <PackageVersion>0.0.0</PackageVersion>
+    <Title>NRaft</Title>
+    <Description>Implementation of the Raft Consensus algorithm.</Description>
+    <Authors>Andy Dote</Authors>
+    <PackageProjectUrl>https://github.com/pondidum/NRaft/</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/pondidum/NRaft/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>git://github.com/pondidum/NRaft</RepositoryUrl>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="newtonsoft.json" Version="11.0.2" />
+    <PackageReference Include="serilog" Version="2.6.0" />
+  </ItemGroup>
+</Project>

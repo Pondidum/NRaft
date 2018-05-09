@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRaft", "NRaft\NRaft.csproj", "{D6AB31AD-542E-4EA1-8387-FD50186D88AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRaft", "src\NRaft\NRaft.csproj", "{D6AB31AD-542E-4EA1-8387-FD50186D88AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRaft.Tests", "NRaft.Tests\NRaft.Tests.csproj", "{73B73A8A-49C7-4DD5-A709-F0465C347687}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRaft.Tests", "src\NRaft.Tests\NRaft.Tests.csproj", "{73B73A8A-49C7-4DD5-A709-F0465C347687}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
