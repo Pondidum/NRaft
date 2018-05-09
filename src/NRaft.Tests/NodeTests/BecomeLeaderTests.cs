@@ -113,6 +113,7 @@ namespace NRaft.Tests.NodeTests
 		public void It_sends_append_entries_to_all()
 		{
 			_timers.EndElection();
+			_timers.BeatHeart();
 
 			var index = _node.NextIndexFor(_heartbeat.RecipientID) - 1;
 

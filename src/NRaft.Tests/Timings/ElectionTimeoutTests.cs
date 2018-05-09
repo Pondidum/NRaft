@@ -50,12 +50,12 @@ namespace NRaft.Tests.Timings
 
 			_election.StartElection(TimeSpan.FromMilliseconds(50));
 
-			await Task.Delay(75);
+			Task.Delay(75).Wait();
 			endings.ShouldBe(1);
 
 			_election.StartElection(TimeSpan.FromMilliseconds(50));
 
-			await Task.Delay(75);
+			Task.Delay(75).Wait();
 			endings.ShouldBe(2);
 		}
 	}
